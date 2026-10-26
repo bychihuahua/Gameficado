@@ -8,8 +8,26 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Gamificação da Vida · Dashboard Produtivo</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    :root {
+      --bg: #0b0f1c;
+      --card-bg: #141b2b;
+      --card-inner: #0e1322;
+      --border: #2a3448;
+      --border-light: #1e273a;
+      --text: #e1e9f0;
+      --text-mid: #b0c8e0;
+      --text-dim: #7a8ea8;
+      --accent: #5f8ee4;
+      --accent-dark: #2d5a9c;
+      --gold: #f5c542;
+      --xp: #4cd964;
+      --hp: #ef4444;
+      --streak: #f97316;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -18,8 +36,8 @@
       -webkit-tap-highlight-color: transparent;
     }
     html, body {
-      background: #0b0f1c;
-      color: #e1e9f0;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
       min-height: 100dvh;
       overflow-x: hidden;
@@ -39,25 +57,25 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #141b2b;
+      background: var(--card-bg);
       border-radius: 16px;
       padding: 12px 14px;
       margin-bottom: 12px;
-      border: 1px solid #2a3448;
+      border: 1px solid var(--border);
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
       gap: 10px;
     }
     .top-bar-title {
       font-size: 0.95rem;
       font-weight: 600;
-      color: #b0c8e0;
+      color: var(--text-mid);
       display: flex;
       align-items: center;
       gap: 8px;
       flex-shrink: 0;
     }
     .top-bar-title i {
-      color: #5f8ee4;
+      color: var(--accent);
       font-size: 1rem;
     }
     .top-bar-title .title-text {
@@ -69,9 +87,10 @@
       flex: 1;
       justify-content: flex-end;
       min-width: 0;
+      flex-wrap: wrap;
     }
     .badge {
-      background: #0e1322;
+      background: var(--card-inner);
       border: 1px solid #253044;
       padding: 6px 10px;
       border-radius: 20px;
@@ -83,20 +102,22 @@
       white-space: nowrap;
       flex-shrink: 0;
     }
-    .badge.gold { color: #f5c542; }
-    .badge.xp { color: #4cd964; }
-    .badge.neutral { color: #b0c8e0; }
+    .badge.hp { color: var(--hp); }
+    .badge.streak { color: var(--streak); }
+    .badge.gold { color: var(--gold); }
+    .badge.xp { color: var(--xp); }
+    .badge.neutral { color: var(--text-mid); }
     .badge i { font-size: 0.7rem; }
 
     /* ============ TABS: DESKTOP ============ */
     .tabs {
       display: flex;
       gap: 4px;
-      background: #141b2b;
+      background: var(--card-bg);
       border-radius: 14px;
       padding: 5px;
       margin-bottom: 12px;
-      border: 1px solid #2a3448;
+      border: 1px solid var(--border);
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
       overflow-x: auto;
       scrollbar-width: none;
@@ -105,7 +126,7 @@
     .tab-btn {
       background: transparent;
       border: none;
-      color: #7a8ea8;
+      color: var(--text-dim);
       padding: 10px 14px;
       border-radius: 10px;
       cursor: pointer;
@@ -123,7 +144,7 @@
       transform: scale(0.96);
     }
     .tab-btn.active {
-      background: #2d5a9c;
+      background: var(--accent-dark);
       color: white;
       box-shadow: 0 4px 10px rgba(45, 90, 156, 0.4);
     }
@@ -139,11 +160,11 @@
 
     /* ============ CARDS ============ */
     .card {
-      background: #141b2b;
+      background: var(--card-bg);
       border-radius: 16px;
       padding: 14px 16px;
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.02);
-      border: 1px solid #2a3448;
+      border: 1px solid var(--border);
       margin-bottom: 12px;
     }
     .card:last-child { margin-bottom: 0; }
@@ -154,12 +175,12 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      color: #b0c8e0;
-      border-bottom: 1px solid #2a3448;
+      color: var(--text-mid);
+      border-bottom: 1px solid var(--border);
       padding-bottom: 10px;
     }
     .card h2 i {
-      color: #5f8ee4;
+      color: var(--accent);
       width: 20px;
       text-align: center;
       font-size: 0.95rem;
@@ -173,7 +194,7 @@
       margin-bottom: 12px;
     }
     .stat-item {
-      background: #0e1322;
+      background: var(--card-inner);
       border-radius: 12px;
       padding: 10px 8px;
       text-align: center;
@@ -183,7 +204,7 @@
       font-size: 0.65rem;
       text-transform: uppercase;
       letter-spacing: 0.4px;
-      color: #7a8ea8;
+      color: var(--text-dim);
       margin-bottom: 2px;
     }
     .stat-value {
@@ -192,8 +213,10 @@
       color: #d6e6ff;
       line-height: 1.1;
     }
-    .stat-value.gold { color: #f5c542; }
-    .stat-value.xp { color: #4cd964; }
+    .stat-value.gold { color: var(--gold); }
+    .stat-value.xp { color: var(--xp); }
+    .stat-value.hp { color: var(--hp); }
+    .stat-value.streak { color: var(--streak); }
 
     /* ============ CHARTS ============ */
     .charts-row {
@@ -203,7 +226,7 @@
       margin-top: 10px;
     }
     .chart-container {
-      background: #0e1322;
+      background: var(--card-inner);
       border-radius: 12px;
       padding: 10px;
       border: 1px solid #253044;
@@ -222,13 +245,32 @@
       gap: 8px;
       margin-bottom: 12px;
     }
+    .form-row {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+    .form-group {
+      flex: 1;
+      min-width: 130px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .form-group label {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
     input, select, button {
-      background: #0e1322;
-      border: 1px solid #2a3448;
+      background: var(--card-inner);
+      border: 1px solid var(--border);
       border-radius: 12px;
       padding: 12px 14px;
-      color: #e1e9f0;
-      font-size: 16px; /* evita zoom no iOS */
+      color: var(--text);
+      font-size: 16px;
       outline: none;
       transition: 0.15s;
       width: 100%;
@@ -236,7 +278,7 @@
       font-family: inherit;
     }
     input:focus, select:focus {
-      border-color: #5f8ee4;
+      border-color: var(--accent);
       box-shadow: 0 0 0 2px rgba(95, 142, 228, 0.2);
     }
     select {
@@ -261,13 +303,14 @@
     }
     button:active { transform: scale(0.97); }
     button.primary {
-      background: #2d5a9c;
+      background: var(--accent-dark);
       border-color: #3f7ad4;
       color: white;
     }
     button.danger {
       background: #4a1f1f;
       border-color: #9c3a3a;
+      color: #fca5a5;
     }
     button.small {
       padding: 8px 12px;
@@ -283,96 +326,84 @@
       outline-offset: 2px;
     }
 
-    /* ============ LISTAS ============ */
-    ul {
-      list-style: none;
-      max-height: none;
-      padding: 0;
-    }
-    li {
+    /* ============ LISTAS & ITEM CARDS ============ */
+    .item-list {
       display: flex;
-      align-items: flex-start;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .item-card {
+      background: var(--card-inner);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
       justify-content: space-between;
-      padding: 12px 10px;
-      border-bottom: 1px solid #1e273a;
-      font-size: 0.9rem;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
     }
-    li:last-child { border-bottom: none; }
-    .item-info {
+    .item-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 200px;
+    }
+    .item-icon-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .item-details {
       display: flex;
       flex-direction: column;
       gap: 4px;
-      flex: 1;
       min-width: 0;
     }
     .item-title {
-      font-weight: 500;
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: var(--text);
       word-break: break-word;
-      line-height: 1.3;
     }
-    .item-title i { flex-shrink: 0; margin-top: 2px; }
-    .item-meta {
-      font-size: 0.7rem;
-      color: #7a8ea8;
+    .item-tags {
       display: flex;
       gap: 6px;
       flex-wrap: wrap;
+      align-items: center;
     }
-    .tag {
-      background: #1e2a3e;
-      padding: 3px 8px;
-      border-radius: 20px;
+    .tag-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 12px;
       font-size: 0.68rem;
-      color: #a0b8d4;
-      white-space: nowrap;
+      color: var(--text-dim);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
-    .tag.gold { color: #f5c542; }
-    .tag.xp { color: #4cd964; }
-    .actions {
+    .tag-chip.xp { color: var(--xp); border-color: rgba(76, 217, 100, 0.2); }
+    .tag-chip.gold { color: var(--gold); border-color: rgba(245, 197, 66, 0.2); }
+    .item-actions {
       display: flex;
       gap: 6px;
+      align-items: center;
       flex-shrink: 0;
-      align-self: center;
-    }
-    .empty-msg {
-      color: #5a6e88;
-      text-align: center;
-      padding: 24px 0;
-      font-style: italic;
-      font-size: 0.9rem;
     }
 
-    /* ============ LOJA ============ */
-    .shop-item {
-      background: #0e1322;
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      border: 1px solid #253044;
-    }
-    .shop-item > span:first-child {
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .shop-item .shop-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-    .shop-price {
-      font-weight: 700;
-      color: #f5c542;
+    .empty-state {
+      color: var(--text-dim);
+      text-align: center;
+      padding: 28px 0;
+      font-style: italic;
       font-size: 0.9rem;
     }
 
@@ -384,27 +415,18 @@
       flex-direction: column;
       gap: 2px;
       padding: 10px 4px;
-      border-bottom: 1px solid #1e273a;
+      border-bottom: 1px solid var(--border-light);
       word-break: break-word;
       line-height: 1.4;
     }
     .history-log span {
       font-size: 0.7rem;
-      color: #7a8ea8;
+      color: var(--text-dim);
     }
     .history-log:last-child { border-bottom: none; }
-    #logsList li { padding: 0; display: block; border: none; }
 
-    .flex-between {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
     .footer-note {
-      color: #4a5e78;
+      color: var(--text-dim);
       font-size: 0.72rem;
       margin-top: 8px;
       line-height: 1.4;
@@ -417,8 +439,8 @@
       bottom: 0;
       left: env(safe-area-inset-left);
       right: env(safe-area-inset-right);
-      background: #141b2b;
-      border-top: 1px solid #2a3448;
+      background: var(--card-bg);
+      border-top: 1px solid var(--border);
       padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
       z-index: 100;
       box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
@@ -438,7 +460,7 @@
       gap: 3px;
       background: transparent;
       border: none;
-      color: #7a8ea8;
+      color: var(--text-dim);
       padding: 8px 4px;
       border-radius: 10px;
       font-size: 0.65rem;
@@ -451,7 +473,7 @@
       font-size: 1.1rem;
     }
     .mobile-nav-btn.active {
-      color: #5f8ee4;
+      color: var(--accent);
       background: #1e2a3e;
     }
     .mobile-nav-btn:active { transform: scale(0.94); }
@@ -459,31 +481,9 @@
     /* ============ RESPONSIVO ============ */
     @media (min-width: 768px) {
       .top-bar-title .title-text { display: inline; }
-      .stats-grid { grid-template-columns: repeat(4, 1fr); }
+      .stats-grid { grid-template-columns: repeat(5, 1fr); }
       .charts-row { grid-template-columns: 1fr 1fr; }
       .chart-container { height: 240px; }
-      .input-group {
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: stretch;
-      }
-      .input-group > input,
-      .input-group > select {
-        width: auto;
-        flex: 1 1 140px;
-      }
-      .input-group > button {
-        width: auto;
-        flex: 0 0 auto;
-      }
-      .shop-item {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .shop-item .shop-actions {
-        width: auto;
-      }
       .card { padding: 20px 22px; }
       .card h2 { font-size: 1.1rem; }
     }
@@ -495,46 +495,14 @@
       }
       .tabs { display: none; }
       .mobile-nav { display: block; }
-      .top-bar {
-        padding: 10px 12px;
-        margin-bottom: 10px;
-      }
+      .top-bar { padding: 10px 12px; margin-bottom: 10px; }
       .top-bar-title i { font-size: 1.15rem; }
       .badge { padding: 5px 8px; font-size: 0.7rem; }
-      .badge i { font-size: 0.65rem; }
-      .card {
-        padding: 14px;
-        border-radius: 14px;
-        margin-bottom: 10px;
-      }
-      li { padding: 10px 6px; }
-      .stat-value { font-size: 1.3rem; }
-      .actions { width: 100%; justify-content: flex-end; }
-      .item-meta .tag { font-size: 0.65rem; }
-      .input-group > button { width: 100%; }
-      .actions .small,
-      .shop-actions .small {
-        min-width: 44px;
-        min-height: 44px;
-      }
-      .mobile-nav-btn { min-height: 56px; }
+      .card { padding: 14px; border-radius: 14px; margin-bottom: 10px; }
+      .stat-value { font-size: 1.2rem; }
+      .item-main { min-width: 100%; }
+      .item-actions { width: 100%; justify-content: flex-end; }
       .chart-container { height: 190px; }
-    }
-
-    @media (max-width: 380px) {
-      .badge.neutral { display: none; }
-      .mobile-nav-btn { font-size: 0.6rem; }
-      .chart-container { height: 170px; }
-      .card { padding: 12px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        scroll-behavior: auto !important;
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
     }
   </style>
 </head>
@@ -542,435 +510,546 @@
 
 <div class="dashboard">
 
-  <!-- ===================== TOP BAR ===================== -->
-  <div class="top-bar">
+  <!-- TOP BAR -->
+  <header class="top-bar">
     <div class="top-bar-title">
       <i class="fas fa-gamepad"></i>
       <span class="title-text">Gamificação da Vida</span>
     </div>
     <div class="top-bar-stats">
-      <span class="badge xp" title="XP Total"><i class="fas fa-star"></i> <span id="topTotalXP">0</span></span>
-      <span class="badge gold" title="Gold"><i class="fas fa-coins"></i> <span id="topTotalGold">0</span></span>
-      <span class="badge neutral" title="Concluídas"><i class="fas fa-check-circle"></i> <span id="topTotalCompleted">0</span></span>
+      <span class="badge hp" title="Vida (HP)"><i class="fas fa-heart"></i> <span id="topHP">100</span>/<span id="topMaxHP">100</span></span>
+      <span class="badge streak" title="Sequência Diária (Streak)"><i class="fas fa-fire"></i> <span id="topStreak">0</span>d</span>
+      <span class="badge xp" title="XP Total"><i class="fas fa-star"></i> <span id="topXP">0</span></span>
+      <span class="badge gold" title="Gold"><i class="fas fa-coins"></i> <span id="topGold">0</span></span>
+      <span class="badge neutral" title="Tarefas Concluídas"><i class="fas fa-check-circle"></i> <span id="topCompleted">0</span></span>
+    </div>
+  </header>
+
+  <!-- BANNER BÓNUS DE RECUPERAÇÃO -->
+  <div id="comebackBanner" class="card" style="display:none; background: linear-gradient(135deg, rgba(245,197,66,0.15), rgba(239,68,68,0.15)); border-color: var(--gold); margin-bottom:12px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <i class="fas fa-bolt" style="font-size:1.8rem; color:var(--gold);"></i>
+      <div>
+        <strong style="color:var(--gold); font-size:1rem;">⚡ Bónus de Recuperação Ativo (2x XP)!</strong>
+        <p style="font-size:0.82rem; color:var(--text-mid); margin-top:2px;">O seu streak foi quebrado recentemente. Esta semana todas as tarefas estão a conceder o <strong>dobro de XP</strong> para te ajudar a retomar o ritmo!</p>
+      </div>
     </div>
   </div>
 
-  <!-- ===================== TABS DESKTOP ===================== -->
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="tab-overview">
-      <i class="fas fa-chart-pie"></i> Visão Geral
-    </button>
-    <button class="tab-btn" data-tab="tab-tasks">
-      <i class="fas fa-list-check"></i> Tarefas
-    </button>
-    <button class="tab-btn" data-tab="tab-attributes">
-      <i class="fas fa-tags"></i> Atributos
-    </button>
-    <button class="tab-btn" data-tab="tab-shop">
-      <i class="fas fa-store"></i> Loja
-    </button>
-    <button class="tab-btn" data-tab="tab-logs">
-      <i class="fas fa-clock-rotate-left"></i> Histórico
-    </button>
-  </div>
+  <!-- NAVEGAÇÃO DESKTOP -->
+  <nav class="tabs" aria-label="Navegação desktop">
+    <button class="tab-btn active" data-tab="tab-overview"><i class="fas fa-chart-pie"></i> Visão Geral</button>
+    <button class="tab-btn" data-tab="tab-tasks"><i class="fas fa-list-check"></i> Tarefas</button>
+    <button class="tab-btn" data-tab="tab-attributes"><i class="fas fa-tags"></i> Atributos</button>
+    <button class="tab-btn" data-tab="tab-shop"><i class="fas fa-store"></i> Loja</button>
+    <button class="tab-btn" data-tab="tab-logs"><i class="fas fa-clock-rotate-left"></i> Histórico</button>
+  </nav>
 
-  <!-- ===================== TAB: VISÃO GERAL ===================== -->
-  <div class="tab-content active" id="tab-overview">
+  <!-- TAB: VISÃO GERAL -->
+  <section class="tab-content active" id="tab-overview">
     <div class="card">
-      <h2><i class="fas fa-chart-pie"></i> Estatísticas</h2>
+      <h2><i class="fas fa-chart-pie"></i> Painel de Progresso</h2>
       <div class="stats-grid">
         <div class="stat-item">
+          <div class="stat-label">Sequência</div>
+          <div class="stat-value streak"><i class="fas fa-fire"></i> <span id="dashStreak">0</span>d</div>
+        </div>
+        <div class="stat-item">
           <div class="stat-label">XP Total</div>
-          <div class="stat-value xp" id="totalXP">0</div>
+          <div class="stat-value xp" id="dashXP">0</div>
         </div>
         <div class="stat-item">
           <div class="stat-label">Gold</div>
-          <div class="stat-value gold" id="totalGold">0</div>
+          <div class="stat-value gold" id="dashGold">0</div>
         </div>
         <div class="stat-item">
           <div class="stat-label">Concluídas</div>
-          <div class="stat-value" id="totalCompleted">0</div>
+          <div class="stat-value" id="dashCompleted">0</div>
         </div>
         <div class="stat-item">
           <div class="stat-label">Ativas</div>
-          <div class="stat-value" id="totalHabits">0</div>
+          <div class="stat-value" id="dashActive">0</div>
         </div>
       </div>
 
       <div class="charts-row">
-        <div class="chart-container">
-          <canvas id="xpByAttrChart"></canvas>
-        </div>
-        <div class="chart-container">
-          <canvas id="completionChart"></canvas>
-        </div>
+        <div class="chart-container"><canvas id="xpByAttrChart"></canvas></div>
+        <div class="chart-container"><canvas id="completionChart"></canvas></div>
       </div>
       <div class="charts-row">
-        <div class="chart-container">
-          <canvas id="evolutionChart"></canvas>
-        </div>
-        <div class="chart-container">
-          <canvas id="focusDistChart"></canvas>
-        </div>
+        <div class="chart-container"><canvas id="evolutionChart"></canvas></div>
+        <div class="chart-container"><canvas id="focusDistChart"></canvas></div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- ===================== TAB: TAREFAS ===================== -->
-  <div class="tab-content" id="tab-tasks">
+  <!-- TAB: TAREFAS -->
+  <section class="tab-content" id="tab-tasks">
     <div class="card">
-      <h2><i class="fas fa-plus-circle"></i> Nova Tarefa / Hábito</h2>
+      <h2><i class="fas fa-plus-circle"></i> Nova Tarefa ou Hábito</h2>
       <div class="input-group">
-        <input type="text" id="taskTitle" placeholder="Nome da tarefa" style="flex:2;">
-        <select id="taskAttrSelect"></select>
-        <select id="taskDifficulty">
-          <option value="1">Fácil · 10 XP / 5 Gold</option>
-          <option value="2">Médio · 25 XP / 12 Gold</option>
-          <option value="3">Difícil · 50 XP / 25 Gold</option>
-          <option value="4">Épico · 100 XP / 60 Gold</option>
-        </select>
-        <select id="taskRecurrence">
-          <option value="once">Única</option>
-          <option value="daily">Diária</option>
-          <option value="weekly">Semanal</option>
-        </select>
-        <button class="primary" id="addTaskBtn"><i class="fas fa-plus"></i> Adicionar</button>
+        <div class="form-row">
+          <div class="form-group" style="flex:2;">
+            <label for="taskTitle">Nome da Tarefa / Hábito</label>
+            <input type="text" id="taskTitle" placeholder="Ex: Exercitar 30min ou Evitar Fast-food">
+          </div>
+          <div class="form-group">
+            <label for="taskAttr">Atributo Pilar</label>
+            <select id="taskAttr"></select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="taskType">Tipo de Tarefa</label>
+            <select id="taskType">
+              <option value="positive">Positiva (Ganhar XP e Gold)</option>
+              <option value="negative">Hábito Negativo (Perde HP e Gold se ceder)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="taskDiff">Dificuldade / Impacto</label>
+            <select id="taskDiff">
+              <option value="easy">Fácil / Leve</option>
+              <option value="medium" selected>Médio / Moderado</option>
+              <option value="hard">Difícil / Grave</option>
+              <option value="epic">Épico / Severo</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="taskRecurrence">Recorrência</label>
+            <select id="taskRecurrence">
+              <option value="once">Única</option>
+              <option value="daily" selected>Diária</option>
+              <option value="weekly">Semanal</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="primary btn-full" id="btnCreateTask" style="margin-top:4px;"><i class="fas fa-plus"></i> Criar Tarefa</button>
       </div>
-      <div class="footer-note">Cada conclusão gera XP ao atributo e Gold à carteira.</div>
     </div>
 
     <div class="card">
-      <h2><i class="fas fa-list-check"></i> Suas Tarefas</h2>
-      <ul id="tasksList"></ul>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+        <h2><i class="fas fa-tasks"></i> Suas Tarefas</h2>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; flex:1; max-width:400px;">
+          <input type="text" id="taskSearchInput" placeholder="Pesquisar..." style="min-height:36px; padding:6px 10px; font-size:0.85rem;">
+          <select id="taskFilterAttr" style="min-height:36px; padding:6px 10px; font-size:0.85rem;">
+            <option value="all">Todos os Atributos</option>
+          </select>
+        </div>
+      </div>
+      <div class="item-list" id="tasksList"></div>
     </div>
-  </div>
+  </section>
 
-  <!-- ===================== TAB: ATRIBUTOS ===================== -->
-  <div class="tab-content" id="tab-attributes">
+  <!-- TAB: ATRIBUTOS -->
+  <section class="tab-content" id="tab-attributes">
     <div class="card">
-      <h2><i class="fas fa-plus-circle"></i> Novo Atributo</h2>
+      <h2><i class="fas fa-plus-circle"></i> Criar Atributo</h2>
       <div class="input-group">
-        <input type="text" id="newAttrName" placeholder="Ex: Saúde, Finanças, Foco..." style="flex:3;">
-        <button class="primary" id="addAttrBtn"><i class="fas fa-plus"></i> Criar Atributo</button>
+        <div class="form-row">
+          <input type="text" id="attrName" placeholder="Nome (ex: Saúde, Finanças)" style="flex:2;">
+          <button class="primary" id="btnCreateAttr"><i class="fas fa-plus"></i> Criar Atributo</button>
+        </div>
       </div>
-      <div class="footer-note">Atributos são os pilares da sua vida.</div>
     </div>
 
     <div class="card">
-      <h2><i class="fas fa-tags"></i> Seus Atributos</h2>
-      <ul id="attributesList"></ul>
+      <h2><i class="fas fa-tags"></i> Atributos Ativos</h2>
+      <div class="item-list" id="attributesList"></div>
     </div>
-  </div>
+  </section>
 
-  <!-- ===================== TAB: LOJA ===================== -->
-  <div class="tab-content" id="tab-shop">
+  <!-- TAB: LOJA -->
+  <section class="tab-content" id="tab-shop">
     <div class="card">
       <h2><i class="fas fa-store"></i> Loja de Recompensas</h2>
-      <div class="flex-between">
-        <span class="badge gold"><i class="fas fa-coins"></i> Saldo: <strong id="shopGold">0</strong></span>
-        <button class="primary" id="addRewardBtn"><i class="fas fa-plus"></i> Novo Prêmio</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span class="badge gold" style="font-size:0.9rem;"><i class="fas fa-coins"></i> Saldo: <strong id="shopGold">0</strong> Gold</span>
+        <button class="primary small" id="btnCreateReward"><i class="fas fa-plus"></i> Novo Prêmio</button>
       </div>
-      <div id="rewardsList" style="margin-top:12px;"></div>
-      <div class="footer-note">Resgates são registrados automaticamente no histórico.</div>
+      <div class="item-list" id="rewardsList"></div>
     </div>
-  </div>
+  </section>
 
-  <!-- ===================== TAB: HISTÓRICO ===================== -->
-  <div class="tab-content" id="tab-logs">
+  <!-- TAB: HISTÓRICO -->
+  <section class="tab-content" id="tab-logs">
     <div class="card">
-      <h2><i class="fas fa-clock-rotate-left"></i> Histórico</h2>
-      <ul id="logsList"></ul>
+      <h2><i class="fas fa-clock-rotate-left"></i> Histórico de Atividades</h2>
+      <div id="logsList"></div>
     </div>
-  </div>
+  </section>
 
 </div>
 
-<!-- ===================== NAV INFERIOR MOBILE ===================== -->
-<nav class="mobile-nav" aria-label="Navegação principal">
+<!-- NAV INFERIOR MOBILE -->
+<nav class="mobile-nav" aria-label="Navegação móvel">
   <div class="mobile-nav-inner">
-    <button type="button" class="mobile-nav-btn active" data-tab="tab-overview" aria-controls="tab-overview" aria-pressed="true">
-      <i class="fas fa-chart-pie"></i>
-      <span>Painel</span>
-    </button>
-    <button type="button" class="mobile-nav-btn" data-tab="tab-tasks" aria-controls="tab-tasks" aria-pressed="false">
-      <i class="fas fa-list-check"></i>
-      <span>Tarefas</span>
-    </button>
-    <button type="button" class="mobile-nav-btn" data-tab="tab-attributes" aria-controls="tab-attributes" aria-pressed="false">
-      <i class="fas fa-tags"></i>
-      <span>Atributos</span>
-    </button>
-    <button type="button" class="mobile-nav-btn" data-tab="tab-shop" aria-controls="tab-shop" aria-pressed="false">
-      <i class="fas fa-store"></i>
-      <span>Loja</span>
-    </button>
-    <button type="button" class="mobile-nav-btn" data-tab="tab-logs" aria-controls="tab-logs" aria-pressed="false">
-      <i class="fas fa-clock-rotate-left"></i>
-      <span>Histórico</span>
-    </button>
+    <button class="mobile-nav-btn active" data-tab="tab-overview"><i class="fas fa-chart-pie"></i><span>Painel</span></button>
+    <button class="mobile-nav-btn" data-tab="tab-tasks"><i class="fas fa-list-check"></i><span>Tarefas</span></button>
+    <button class="mobile-nav-btn" data-tab="tab-attributes"><i class="fas fa-tags"></i><span>Atributos</span></button>
+    <button class="mobile-nav-btn" data-tab="tab-shop"><i class="fas fa-store"></i><span>Loja</span></button>
+    <button class="mobile-nav-btn" data-tab="tab-logs"><i class="fas fa-clock-rotate-left"></i><span>Histórico</span></button>
   </div>
 </nav>
 
 <script>
   (function() {
-    // ======================= ESTADO =======================
-    let state = {
-      attributes: [],
-      tasks: [],
-      rewards: [],
-      logs: [],
+    window.app = {};
+
+    const defaultState = {
+      attributes: [
+        { id: 'attr-1', name: 'Saúde', icon: 'heartbeat', color: '#ef4444' },
+        { id: 'attr-2', name: 'Finanças', icon: 'coins', color: '#f59e0b' },
+        { id: 'attr-3', name: 'Foco', icon: 'bullseye', color: '#3b82f6' },
+        { id: 'attr-4', name: 'Conhecimento', icon: 'book', color: '#8b5cf6' },
+        { id: 'attr-5', name: 'Carreira', icon: 'briefcase', color: '#10b981' }
+      ],
+      tasks: [
+        { id: 't-1', title: 'Beber 2L de Água', attrId: 'attr-1', difficulty: 'easy', type: 'positive', recurrence: 'daily', completed: false, xp: 10, gold: 5, lastCompletedAt: null, createdAt: Date.now() },
+        { id: 't-2', title: 'Fumar / Comer Fast-Food', attrId: 'attr-1', difficulty: 'medium', type: 'negative', recurrence: 'daily', completed: false, xp: 0, gold: 12, hpPenalty: 20, lastCompletedAt: null, createdAt: Date.now() },
+        { id: 't-3', title: 'Ler 15 Páginas de Livro', attrId: 'attr-4', difficulty: 'medium', type: 'positive', recurrence: 'daily', completed: false, xp: 25, gold: 12, lastCompletedAt: null, createdAt: Date.now() }
+      ],
+      rewards: [
+        { id: 'r-hp-potion', name: 'Porção de Cura (Recupera 50 HP)', price: 40, isHpPotion: true },
+        { id: 'r-1', name: '1 Horinha de Jogos / Videogame', price: 50 },
+        { id: 'r-2', name: 'Pedir Delivery ou Lanche Especial', price: 150 }
+      ],
+      logs: [
+        { id: 'l-1', type: 'system', message: 'Sistema de Gamificação com Streaks e Hábitos Negativos carregado com sucesso.', timestamp: Date.now() }
+      ],
       gold: 100,
       totalXP: 0,
       completedCount: 0,
+      hp: 100,
+      maxHp: 100,
+      streak: 0,
+      lastStreakDate: null,
+      comebackBoostUntil: null,
+      config: {
+        difficulties: {
+          easy: { xp: 10, gold: 5, hp: 10 },
+          medium: { xp: 25, gold: 12, hp: 20 },
+          hard: { xp: 50, gold: 25, hp: 35 },
+          epic: { xp: 100, gold: 60, hp: 50 }
+        }
+      }
     };
 
-    if (!localStorage.getItem('gamification_state_v3')) {
-      state.attributes = [
-        { id: 'attr1', name: 'Saúde', icon: 'heartbeat' },
-        { id: 'attr2', name: 'Finanças', icon: 'coins' },
-        { id: 'attr3', name: 'Foco', icon: 'bullseye' },
-        { id: 'attr4', name: 'Conhecimento', icon: 'book' },
-        { id: 'attr5', name: 'Carreira', icon: 'briefcase' }
-      ];
-      state.tasks = [
-        { id: 't1', title: 'Beber 2L de água', attrId: 'attr1', difficulty: 1, recurrence: 'daily', completed: false, xp: 10, gold: 5, createdAt: Date.now() },
-        { id: 't2', title: 'Ler 10 páginas', attrId: 'attr4', difficulty: 2, recurrence: 'daily', completed: false, xp: 25, gold: 12, createdAt: Date.now() },
-        { id: 't3', title: 'Revisar orçamento', attrId: 'attr2', difficulty: 3, recurrence: 'weekly', completed: false, xp: 50, gold: 25, createdAt: Date.now() }
-      ];
-      state.rewards = [
-        { id: 'r1', name: '1h de série', price: 50 },
-        { id: 'r2', name: 'Jantar fora', price: 300 },
-        { id: 'r3', name: 'Dia de folga', price: 500 }
-      ];
-      state.logs = [{ id: 'log1', text: 'Sistema iniciado. Bem-vindo!', timestamp: Date.now() }];
-      state.gold = 150;
-      state.totalXP = 0;
-      state.completedCount = 0;
-      saveState();
-    } else {
-      state = JSON.parse(localStorage.getItem('gamification_state_v3'));
-      if (!state.logs) state.logs = [];
-      if (!state.attributes) state.attributes = [];
-      if (!state.tasks) state.tasks = [];
-      if (!state.rewards) state.rewards = [];
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem('gamification_state_v4');
+        if (saved) return JSON.parse(saved);
+      } catch(e) { console.error('Erro ao carregar estado:', e); }
+      return JSON.parse(JSON.stringify(defaultState));
     }
 
-    // ======================= UTILITÁRIOS =======================
     function saveState() {
-      localStorage.setItem('gamification_state_v3', JSON.stringify(state));
-    }
-    function generateId() {
-      return Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-    }
-    function addLog(message) {
-      state.logs.unshift({ id: generateId(), text: message, timestamp: Date.now() });
-      if (state.logs.length > 100) state.logs.pop();
-      saveState();
-      renderLogs();
-    }
-    function getAttrName(attrId) {
-      const attr = state.attributes.find(a => a.id === attrId);
-      return attr ? attr.name : 'Geral';
+      localStorage.setItem('gamification_state_v4', JSON.stringify(state));
     }
 
-    // ======================= TABS (unificado) =======================
+    function addLog(type, message) {
+      state.logs.unshift({ id: 'l-' + Date.now(), type, message, timestamp: Date.now() });
+      if (state.logs.length > 200) state.logs.pop();
+    }
+
+    // ======================= CHECAGENS & RESETS =======================
+    function checkRecurrenceAndResets() {
+      const now = new Date();
+      let changed = false;
+
+      if (state.hp === undefined) state.hp = 100;
+      if (state.maxHp === undefined) state.maxHp = 100;
+      if (state.streak === undefined) state.streak = 0;
+
+      // Check Streak
+      if (state.lastStreakDate) {
+        const lastStr = new Date(state.lastStreakDate);
+        const diffDays = Math.floor((now.setHours(0,0,0,0) - lastStr.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays > 1) {
+          if (state.streak > 0) {
+            addLog('system', `🔥 Streak de ${state.streak} dias foi quebrado! Ativado Desafio de Recuperação (2x XP durante 7 dias).`);
+            state.comebackBoostUntil = Date.now() + (7 * 24 * 60 * 60 * 1000);
+          }
+          state.streak = 0;
+          changed = true;
+        }
+      }
+
+      // Reset de Tarefas Recorrentes
+      state.tasks.forEach(task => {
+        if (!task.completed || !task.lastCompletedAt) return;
+        const lastDate = new Date(task.lastCompletedAt);
+        let reset = false;
+
+        if (task.recurrence === 'daily') {
+          if (now.toDateString() !== lastDate.toDateString() && now > lastDate) reset = true;
+        } else if (task.recurrence === 'weekly') {
+          const diffDays = (now - lastDate) / (1000 * 60 * 60 * 24);
+          if (diffDays >= 7) reset = true;
+        }
+
+        if (reset) {
+          task.completed = false;
+          changed = true;
+          addLog('system', `Tarefa recorrente reiniciada: "${task.title}"`);
+        }
+      });
+
+      if (changed) {
+        saveState();
+        renderAll();
+      }
+    }
+
+    // ======================= TABS =======================
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       const target = document.getElementById(tabId);
       if (target) target.classList.add('active');
 
-      // Atualiza botões (desktop e mobile)
       document.querySelectorAll('.tab-btn, .mobile-nav-btn').forEach(b => {
-        const isActive = b.dataset.tab === tabId;
-        b.classList.toggle('active', isActive);
-        if (b.classList.contains('mobile-nav-btn')) {
-          b.setAttribute('aria-pressed', String(isActive));
-        }
+        b.classList.toggle('active', b.dataset.tab === tabId);
       });
 
-      // Scroll para o topo e re-renderiza gráficos
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      if (tabId === 'tab-overview') {
-        setTimeout(initCharts, 80);
-      }
+      if (tabId === 'tab-overview') setTimeout(initCharts, 80);
     }
 
     document.querySelectorAll('.tab-btn, .mobile-nav-btn').forEach(btn => {
       btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 
-    // ======================= DOM =======================
-    const totalXPSpan = document.getElementById('totalXP');
-    const totalGoldSpan = document.getElementById('totalGold');
-    const totalCompletedSpan = document.getElementById('totalCompleted');
-    const totalHabitsSpan = document.getElementById('totalHabits');
-    const shopGoldSpan = document.getElementById('shopGold');
-    const topTotalXP = document.getElementById('topTotalXP');
-    const topTotalGold = document.getElementById('topTotalGold');
-    const topTotalCompleted = document.getElementById('topTotalCompleted');
+    // ======================= RENDERS =======================
+    function renderTopStats() {
+      document.getElementById('topXP').textContent = state.totalXP || 0;
+      document.getElementById('topGold').textContent = state.gold || 0;
+      document.getElementById('topCompleted').textContent = state.completedCount || 0;
+      document.getElementById('topHP').textContent = state.hp !== undefined ? state.hp : 100;
+      document.getElementById('topMaxHP').textContent = state.maxHp || 100;
+      document.getElementById('topStreak').textContent = state.streak || 0;
 
-    const attributesList = document.getElementById('attributesList');
-    const taskAttrSelect = document.getElementById('taskAttrSelect');
-    const tasksList = document.getElementById('tasksList');
-    const rewardsList = document.getElementById('rewardsList');
-    const logsList = document.getElementById('logsList');
+      document.getElementById('dashXP').textContent = state.totalXP || 0;
+      document.getElementById('dashGold').textContent = state.gold || 0;
+      document.getElementById('dashCompleted').textContent = state.completedCount || 0;
+      document.getElementById('dashStreak').textContent = state.streak || 0;
+      document.getElementById('dashActive').textContent = state.tasks.filter(t => !t.completed && t.type !== 'negative').length;
+      document.getElementById('shopGold').textContent = state.gold || 0;
 
-    function updateStats() {
-      const totalXP = state.totalXP || 0;
-      const gold = state.gold || 0;
-      const completed = state.completedCount || 0;
-
-      totalXPSpan.textContent = totalXP;
-      totalGoldSpan.textContent = gold;
-      totalCompletedSpan.textContent = completed;
-      totalHabitsSpan.textContent = state.tasks.length;
-      shopGoldSpan.textContent = gold;
-      topTotalXP.textContent = totalXP;
-      topTotalGold.textContent = gold;
-      topTotalCompleted.textContent = completed;
-    }
-
-    function renderAttributes() {
-      attributesList.innerHTML = '';
-      if (state.attributes.length === 0) {
-        attributesList.innerHTML = '<li class="empty-msg">Nenhum atributo. Crie seu primeiro pilar.</li>';
+      const banner = document.getElementById('comebackBanner');
+      if (state.comebackBoostUntil && Date.now() < state.comebackBoostUntil) {
+        banner.style.display = 'block';
       } else {
-        state.attributes.forEach(attr => {
-          const li = document.createElement('li');
-          li.innerHTML = `
-            <div class="item-info">
-              <span class="item-title"><i class="fas fa-${attr.icon || 'star'}" style="color:#5f8ee4;"></i> ${attr.name}</span>
-            </div>
-            <div class="actions">
-              <button class="small danger" onclick="window.deleteAttribute('${attr.id}')" aria-label="Excluir"><i class="fas fa-trash"></i></button>
-            </div>
-          `;
-          attributesList.appendChild(li);
-        });
-      }
-      const currentVal = taskAttrSelect.value;
-      taskAttrSelect.innerHTML = '';
-      state.attributes.forEach(attr => {
-        const opt = document.createElement('option');
-        opt.value = attr.id;
-        opt.textContent = attr.name;
-        taskAttrSelect.appendChild(opt);
-      });
-      if (currentVal && state.attributes.some(a => a.id === currentVal)) {
-        taskAttrSelect.value = currentVal;
-      } else if (state.attributes.length > 0) {
-        taskAttrSelect.value = state.attributes[0].id;
+        banner.style.display = 'none';
       }
     }
 
     function renderTasks() {
-      tasksList.innerHTML = '';
+      const list = document.getElementById('tasksList');
+      const filterAttrSelect = document.getElementById('taskFilterAttr');
+      const searchInput = document.getElementById('taskSearchInput');
+
+      const currentFilter = filterAttrSelect.value;
+      filterAttrSelect.innerHTML = '<option value="all">Todos os Atributos</option>';
+      state.attributes.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.id;
+        opt.textContent = a.name;
+        filterAttrSelect.appendChild(opt);
+      });
+      filterAttrSelect.value = currentFilter || 'all';
+
+      const taskAttrInp = document.getElementById('taskAttr');
+      taskAttrInp.innerHTML = '';
+      state.attributes.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.id;
+        opt.textContent = a.name;
+        taskAttrInp.appendChild(opt);
+      });
+
+      list.innerHTML = '';
+
       if (state.tasks.length === 0) {
-        tasksList.innerHTML = '<li class="empty-msg">Nenhuma tarefa. Adicione uma!</li>';
+        list.innerHTML = '<div class="empty-state">Nenhuma tarefa cadastrada. Adicione uma acima!</div>';
         return;
       }
-      const sorted = [...state.tasks].sort((a,b) => a.completed - b.completed);
+
+      const query = (searchInput.value || '').toLowerCase();
+      const selectedAttr = filterAttrSelect.value;
+
+      let filtered = state.tasks.filter(t => {
+        const matchesQuery = t.title.toLowerCase().includes(query);
+        const matchesAttr = selectedAttr === 'all' || t.attrId === selectedAttr;
+        return matchesQuery && matchesAttr;
+      });
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="empty-state">Nenhuma tarefa corresponde à pesquisa.</div>';
+        return;
+      }
+
+      const sorted = [...filtered].sort((a,b) => a.completed - b.completed);
+
       sorted.forEach(task => {
-        const li = document.createElement('li');
-        const attrName = getAttrName(task.attrId);
-        const diffLabel = ['', 'Fácil', 'Médio', 'Difícil', 'Épico'][task.difficulty];
-        li.innerHTML = `
-          <div class="item-info">
-            <span class="item-title">
-              <i class="fas fa-${task.completed ? 'check-circle' : 'circle'}" style="color:${task.completed ? '#4cd964' : '#5f8ee4'};"></i>
-              ${task.title}
-            </span>
-            <div class="item-meta">
-              <span class="tag"><i class="fas fa-tag"></i> ${attrName}</span>
-              <span class="tag xp">+${task.xp} XP</span>
-              <span class="tag gold">+${task.gold}G</span>
-              <span class="tag">${diffLabel} · ${task.recurrence === 'daily' ? 'Diária' : task.recurrence === 'weekly' ? 'Semanal' : 'Única'}</span>
+        const attr = state.attributes.find(a => a.id === task.attrId) || { name: 'Geral', icon: 'star', color: '#5f8ee4' };
+        const isNegative = task.type === 'negative';
+        const card = document.createElement('div');
+        card.className = 'item-card';
+
+        let recLabel = task.recurrence === 'daily' ? 'Diária' : task.recurrence === 'weekly' ? 'Semanal' : 'Única';
+
+        card.innerHTML = `
+          <div class="item-main">
+            <div class="item-icon-badge" style="background-color: ${isNegative ? 'var(--hp)' : attr.color}">
+              <i class="fas fa-${isNegative ? 'exclamation-triangle' : (attr.icon || 'star')}"></i>
+            </div>
+            <div class="item-details">
+              <span class="item-title" style="${task.completed ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${task.title}</span>
+              <div class="item-tags">
+                <span class="tag-chip" style="color:${attr.color}; border-color:${attr.color}55"><i class="fas fa-tag"></i> ${attr.name}</span>
+                ${isNegative ? 
+                  `<span class="tag-chip" style="color:var(--hp); border-color:rgba(239,68,68,0.3);"><i class="fas fa-heart-crack"></i> -${task.hpPenalty || 20} HP</span>
+                   <span class="tag-chip" style="color:var(--hp);"><i class="fas fa-minus-circle"></i> -${task.gold} Gold</span>` : 
+                  `<span class="tag-chip xp">+${task.xp} XP</span>
+                   <span class="tag-chip gold">+${task.gold} Gold</span>`
+                }
+                <span class="tag-chip"><i class="fas fa-arrows-rotate"></i> ${recLabel}</span>
+              </div>
             </div>
           </div>
-          <div class="actions">
-            ${!task.completed ? `<button class="small primary" onclick="window.completeTask('${task.id}')"><i class="fas fa-check"></i> Concluir</button>` : '<span style="color:#4cd964;font-size:0.75rem;padding:8px 4px;"><i class="fas fa-check-circle"></i> Feito</span>'}
-            <button class="small danger" onclick="window.deleteTask('${task.id}')" aria-label="Excluir"><i class="fas fa-trash"></i></button>
+          <div class="item-actions">
+            ${isNegative ? 
+              `<button class="small danger" onclick="window.app.triggerNegativeHabit('${task.id}')"><i class="fas fa-bolt"></i> Registrar Deslize</button>` :
+              (!task.completed ? 
+                `<button class="small primary" onclick="window.app.completeTask('${task.id}')"><i class="fas fa-check"></i> Concluir</button>` : 
+                `<span class="tag-chip" style="color:var(--xp); font-size:0.8rem;"><i class="fas fa-check-double"></i> Feito</span>`)
+            }
+            <button class="small danger" onclick="window.app.deleteTask('${task.id}')" aria-label="Excluir"><i class="fas fa-trash"></i></button>
           </div>
         `;
-        tasksList.appendChild(li);
+        list.appendChild(card);
+      });
+    }
+
+    function renderAttributes() {
+      const list = document.getElementById('attributesList');
+      list.innerHTML = '';
+
+      if (state.attributes.length === 0) {
+        list.innerHTML = '<div class="empty-state">Nenhum atributo criado.</div>';
+        return;
+      }
+
+      state.attributes.forEach(attr => {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.innerHTML = `
+          <div class="item-main">
+            <div class="item-icon-badge" style="background-color:${attr.color || 'var(--accent)'}">
+              <i class="fas fa-${attr.icon || 'star'}"></i>
+            </div>
+            <div class="item-details">
+              <span class="item-title">${attr.name}</span>
+            </div>
+          </div>
+          <div class="item-actions">
+            <button class="small danger" onclick="window.app.deleteAttribute('${attr.id}')"><i class="fas fa-trash"></i></button>
+          </div>
+        `;
+        list.appendChild(card);
       });
     }
 
     function renderRewards() {
-      rewardsList.innerHTML = '';
+      const list = document.getElementById('rewardsList');
+      list.innerHTML = '';
+
       if (state.rewards.length === 0) {
-        rewardsList.innerHTML = '<div class="empty-msg">Nenhum prêmio cadastrado. Crie um!</div>';
+        list.innerHTML = '<div class="empty-state">Nenhuma recompensa criada.</div>';
         return;
       }
-      state.rewards.forEach(reward => {
-        const div = document.createElement('div');
-        div.className = 'shop-item';
-        const disabled = state.gold < reward.price;
-        div.innerHTML = `
-          <span><i class="fas fa-gift" style="color:#f5c542;"></i> ${reward.name}</span>
-          <div class="shop-actions">
-            <span class="shop-price">${reward.price} <i class="fas fa-coins"></i></span>
-            <button class="small primary" onclick="window.redeemReward('${reward.id}')" ${disabled ? 'disabled' : ''}>
+
+      state.rewards.forEach(r => {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        const disabled = state.gold < r.price;
+
+        card.innerHTML = `
+          <div class="item-main">
+            <div class="item-icon-badge" style="background-color: ${r.isHpPotion ? 'var(--hp)' : 'var(--gold)'}">
+              <i class="fas fa-${r.isHpPotion ? 'kit-medical' : 'gift'}"></i>
+            </div>
+            <div class="item-details">
+              <span class="item-title">${r.name}</span>
+              <div class="item-tags">
+                <span class="tag-chip gold"><i class="fas fa-coins"></i> ${r.price} Gold</span>
+              </div>
+            </div>
+          </div>
+          <div class="item-actions">
+            <button class="small primary" onclick="window.app.redeemReward('${r.id}')" ${disabled ? 'disabled' : ''}>
               <i class="fas fa-exchange-alt"></i> Resgatar
             </button>
-            <button class="small danger" onclick="window.deleteReward('${reward.id}')" aria-label="Excluir"><i class="fas fa-trash"></i></button>
+            <button class="small danger" onclick="window.app.deleteReward('${r.id}')"><i class="fas fa-trash"></i></button>
           </div>
         `;
-        rewardsList.appendChild(div);
+        list.appendChild(card);
       });
     }
 
     function renderLogs() {
-      logsList.innerHTML = '';
+      const list = document.getElementById('logsList');
+      list.innerHTML = '';
+
       if (state.logs.length === 0) {
-        logsList.innerHTML = '<li class="empty-msg">Nenhum registro ainda.</li>';
+        list.innerHTML = '<div class="empty-state">Nenhum registro.</div>';
         return;
       }
-      state.logs.slice(0, 60).forEach(log => {
-        const li = document.createElement('li');
-        const date = new Date(log.timestamp).toLocaleString('pt-BR');
-        li.innerHTML = `<div class="history-log"><span>${date}</span> ${log.text}</div>`;
-        logsList.appendChild(li);
+
+      state.logs.slice(0, 60).forEach(l => {
+        const item = document.createElement('div');
+        item.className = 'history-log';
+        const date = new Date(l.timestamp).toLocaleString('pt-BR');
+        item.innerHTML = `<span>${date}</span> ${l.message}`;
+        list.appendChild(item);
       });
     }
 
     // ======================= GRÁFICOS =======================
-    let xpByAttrChart, completionChart, evolutionChart, focusDistChart;
-
-    // Configurações responsivas por breakpoint
-    function chartFontSize() { return window.innerWidth < 600 ? 10 : 12; }
-    function chartPadding() { return window.innerWidth < 600 ? 6 : 12; }
-    function legendLabels() {
-      const small = window.innerWidth < 600;
-      return { color: '#b0c8e0', boxWidth: small ? 8 : 12, font: { size: small ? 9 : 11 } };
-    }
+    let chartInstances = {};
 
     function initCharts() {
-      if (xpByAttrChart) xpByAttrChart.destroy();
-      if (completionChart) completionChart.destroy();
-      if (evolutionChart) evolutionChart.destroy();
-      if (focusDistChart) focusDistChart.destroy();
-
-      const isMobile = window.innerWidth < 600;
-      const fontSize = chartFontSize();
-      const titleSize = isMobile ? 11 : 12;
-
-      const attrXP = state.attributes.map(attr => {
-        const tasksAttr = state.tasks.filter(t => t.attrId === attr.id && t.completed);
-        return tasksAttr.reduce((sum, t) => sum + t.xp, 0) || 5;
+      ['xpByAttrChart', 'completionChart', 'evolutionChart', 'focusDistChart'].forEach(id => {
+        if (chartInstances[id]) chartInstances[id].destroy();
       });
-      const attrNames = state.attributes.map(a => a.name);
 
+      const attrNames = state.attributes.map(a => a.name);
+      const attrXP = state.attributes.map(attr => {
+        return state.tasks
+          .filter(t => t.attrId === attr.id && t.completed)
+          .reduce((sum, t) => sum + t.xp, 0);
+      });
+
+      // Chart 1: XP por Atributo
       const ctx1 = document.getElementById('xpByAttrChart').getContext('2d');
-      xpByAttrChart = new Chart(ctx1, {
+      chartInstances.xpByAttrChart = new Chart(ctx1, {
         type: 'bar',
         data: {
           labels: attrNames.length ? attrNames : ['—'],
           datasets: [{
-            label: 'XP',
+            label: 'XP Acumulado',
             data: attrXP.length ? attrXP : [0],
-            backgroundColor: '#5f8ee4',
-            borderRadius: 4,
+            backgroundColor: state.attributes.map(a => a.color || '#5f8ee4'),
+            borderRadius: 6,
+            spacing: 0
           }]
         },
         options: {
@@ -978,57 +1057,55 @@
           maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
-            title: { display: true, text: 'XP por Atributo', color: '#b0c8e0', font: { size: titleSize } }
+            title: { display: true, text: 'XP por Atributo', color: '#b0c8e0' }
           },
           scales: {
-            y: { beginAtZero: true, grid: { color: '#1e273a' }, ticks: { color: '#7a8ea8', font: { size: fontSize } } },
-            x: { ticks: { color: '#7a8ea8', font: { size: fontSize } } }
+            y: { beginAtZero: true, grid: { color: '#1e273a' }, ticks: { color: '#7a8ea8' } },
+            x: { ticks: { color: '#7a8ea8' } }
           }
         }
       });
 
-      const completedTasks = state.tasks.filter(t => t.completed).length;
-      const pendingTasks = state.tasks.filter(t => !t.completed).length;
+      // Chart 2: Taxa de Conclusão
+      const completedCount = state.tasks.filter(t => t.completed).length;
+      const pendingCount = state.tasks.filter(t => !t.completed && t.type !== 'negative').length;
+
       const ctx2 = document.getElementById('completionChart').getContext('2d');
-      completionChart = new Chart(ctx2, {
+      chartInstances.completionChart = new Chart(ctx2, {
         type: 'doughnut',
         data: {
           labels: ['Concluídas', 'Pendentes'],
           datasets: [{
-            data: [completedTasks, pendingTasks],
+            data: [completedCount, pendingCount],
             backgroundColor: ['#4cd964', '#2a3448'],
-            borderWidth: 0
+            borderWidth: 0,
+            spacing: 0
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          cutout: isMobile ? '60%' : '65%',
           plugins: {
-            legend: { position: 'bottom', labels: legendLabels() },
-            title: { display: true, text: 'Taxa de Conclusão', color: '#b0c8e0', font: { size: titleSize } }
+            legend: { position: 'bottom', labels: { color: '#b0c8e0' } },
+            title: { display: true, text: 'Conclusão de Tarefas', color: '#b0c8e0' }
           }
         }
       });
 
-      const labels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
-      const dataEvolution = [20, 35, 50, 40, 70, 90, 110];
+      // Chart 3: Evolução Semanal
       const ctx3 = document.getElementById('evolutionChart').getContext('2d');
-      evolutionChart = new Chart(ctx3, {
+      chartInstances.evolutionChart = new Chart(ctx3, {
         type: 'line',
         data: {
-          labels: labels,
+          labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
           datasets: [{
-            label: 'XP',
-            data: dataEvolution,
+            label: 'XP Diário',
+            data: [15, 30, 45, 30, 60, 80, 100],
             borderColor: '#4cd964',
             backgroundColor: 'rgba(76, 217, 100, 0.1)',
             fill: true,
             tension: 0.3,
-            pointBackgroundColor: '#4cd964',
-            pointRadius: isMobile ? 2 : 4,
-            pointHoverRadius: 5,
-            borderWidth: 2
+            spacing: 0
           }]
         },
         options: {
@@ -1036,186 +1113,245 @@
           maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
-            title: { display: true, text: 'Evolução Semanal', color: '#b0c8e0', font: { size: titleSize } }
+            title: { display: true, text: 'Evolução de XP (Semana)', color: '#b0c8e0' }
           },
           scales: {
-            y: { beginAtZero: true, grid: { color: '#1e273a' }, ticks: { color: '#7a8ea8', font: { size: fontSize } } },
-            x: { ticks: { color: '#7a8ea8', font: { size: fontSize } } }
+            y: { beginAtZero: true, grid: { color: '#1e273a' }, ticks: { color: '#7a8ea8' } },
+            x: { ticks: { color: '#7a8ea8' } }
           }
         }
       });
 
+      // Chart 4: Distribuição de Foco
       const focusData = state.attributes.map(attr => {
-        const count = state.tasks.filter(t => t.attrId === attr.id).length;
-        return count || 1;
+        return state.tasks.filter(t => t.attrId === attr.id).length || 1;
       });
+
       const ctx4 = document.getElementById('focusDistChart').getContext('2d');
-      focusDistChart = new Chart(ctx4, {
+      chartInstances.focusDistChart = new Chart(ctx4, {
         type: 'polarArea',
         data: {
           labels: attrNames.length ? attrNames : ['—'],
           datasets: [{
-            data: focusData.length ? focusData : [1],
-            backgroundColor: ['#5f8ee4', '#4cd964', '#f5c542', '#e46a5f', '#a55fe4', '#5fe4d0'],
+            data: focusData,
+            backgroundColor: ['#5f8ee4', '#4cd964', '#f5c542', '#ef4444', '#8b5cf6'],
+            spacing: 0
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'bottom', labels: legendLabels() },
-            title: { display: true, text: 'Distribuição de Foco', color: '#b0c8e0', font: { size: titleSize } }
+            legend: { position: 'bottom', labels: { color: '#b0c8e0' } },
+            title: { display: true, text: 'Distribuição de Tarefas', color: '#b0c8e0' }
           },
           scales: {
-            r: { grid: { color: '#1e273a' }, ticks: { color: '#7a8ea8', font: { size: fontSize }, backdropColor: 'transparent' } }
+            r: { grid: { color: '#1e273a' }, ticks: { backdropColor: 'transparent', color: '#7a8ea8' } }
           }
         }
       });
     }
 
-    // Redimensionar gráficos em mudança de orientação
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        if (document.getElementById('tab-overview').classList.contains('active')) {
-          initCharts();
-        }
-      }, 200);
-    });
-
-    // ======================= AÇÕES =======================
-    window.deleteAttribute = function(attrId) {
-      if (state.attributes.length <= 1) {
-        alert('Você precisa de pelo menos um atributo.');
-        return;
-      }
-      if (state.tasks.some(t => t.attrId === attrId)) {
-        alert('Não é possível excluir: há tarefas associadas a este atributo.');
-        return;
-      }
-      if (!confirm('Excluir este atributo?')) return;
-      const removed = state.attributes.find(a => a.id === attrId);
-      state.attributes = state.attributes.filter(a => a.id !== attrId);
-      saveState();
-      renderAll();
-      addLog(`Atributo removido: ${removed ? removed.name : attrId}`);
-    };
-
-    window.deleteTask = function(taskId) {
-      if (!confirm('Excluir esta tarefa?')) return;
-      const removed = state.tasks.find(t => t.id === taskId);
-      state.tasks = state.tasks.filter(t => t.id !== taskId);
-      saveState();
-      renderAll();
-      addLog(`Tarefa removida: "${removed ? removed.title : taskId}"`);
-    };
-
-    window.completeTask = function(taskId) {
+    // ======================= AÇÕES PRINCIPAIS =======================
+    window.app.completeTask = (taskId) => {
       const task = state.tasks.find(t => t.id === taskId);
       if (!task || task.completed) return;
 
       task.completed = true;
-      state.totalXP = (state.totalXP || 0) + task.xp;
+      task.lastCompletedAt = Date.now();
+
+      const isBoost = state.comebackBoostUntil && Date.now() < state.comebackBoostUntil;
+      const earnedXP = isBoost ? task.xp * 2 : task.xp;
+
+      state.totalXP = (state.totalXP || 0) + earnedXP;
       state.gold = (state.gold || 0) + task.gold;
       state.completedCount = (state.completedCount || 0) + 1;
 
+      // Atualizar Streak
+      const now = new Date();
+      const lastStr = state.lastStreakDate ? new Date(state.lastStreakDate) : null;
+      if (!lastStr || now.toDateString() !== lastStr.toDateString()) {
+        state.streak = (state.streak || 0) + 1;
+        state.lastStreakDate = Date.now();
+      }
+
+      // Confete
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+      }
+
+      addLog('task_complete', `Concluiu a tarefa: "${task.title}" (+${earnedXP} XP${isBoost ? ' [2x Boost]' : ''}, +${task.gold} Gold). Streak: 🔥 ${state.streak} dias!`);
       saveState();
       renderAll();
-      addLog(`✅ Tarefa concluída: "${task.title}" (+${task.xp} XP, +${task.gold} Gold)`);
     };
 
-    window.redeemReward = function(rewardId) {
-      const reward = state.rewards.find(r => r.id === rewardId);
-      if (!reward) return;
-      if (state.gold < reward.price) {
-        alert('Gold insuficiente!');
+    window.app.triggerNegativeHabit = (taskId) => {
+      const task = state.tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      const hpLoss = task.hpPenalty || 20;
+      const goldLoss = task.gold || 12;
+
+      state.hp = Math.max(0, (state.hp || 100) - hpLoss);
+      state.gold = Math.max(0, (state.gold || 0) - goldLoss);
+
+      addLog('system', `⚠️ Cedeu ao hábito negativo "${task.title}". Perdeu -${hpLoss} HP e -${goldLoss} Gold.`);
+
+      if (state.hp <= 0) {
+        alert('🚨 SEU HP CHEGOU A ZERO! Você perdeu metade do seu Gold para se restaurar.');
+        state.gold = Math.floor(state.gold / 2);
+        state.hp = 50;
+      }
+
+      saveState();
+      renderAll();
+    };
+
+    window.app.deleteTask = (taskId) => {
+      if (!confirm('Excluir esta tarefa?')) return;
+      const task = state.tasks.find(t => t.id === taskId);
+      state.tasks = state.tasks.filter(t => t.id !== taskId);
+      addLog('delete', `Tarefa removida: "${task ? task.title : taskId}"`);
+      saveState();
+      renderAll();
+    };
+
+    window.app.deleteAttribute = (attrId) => {
+      if (state.tasks.some(t => t.attrId === attrId)) {
+        alert('Não é possível excluir: existem tarefas vinculadas a este atributo.');
         return;
       }
-      if (!confirm(`Resgatar "${reward.name}" por ${reward.price} Gold?`)) return;
-      state.gold -= reward.price;
+      if (!confirm('Excluir atributo?')) return;
+      state.attributes = state.attributes.filter(a => a.id !== attrId);
       saveState();
       renderAll();
-      addLog(`🎁 Recompensa resgatada: "${reward.name}" (-${reward.price} Gold)`);
     };
 
-    window.deleteReward = function(rewardId) {
-      if (!confirm('Excluir esta recompensa?')) return;
-      const removed = state.rewards.find(r => r.id === rewardId);
+    window.app.redeemReward = (rewardId) => {
+      const reward = state.rewards.find(r => r.id === rewardId);
+      if (!reward) return;
+
+      if (state.gold < reward.price) {
+        alert('Gold insuficiente.');
+        return;
+      }
+
+      if (!confirm(`Resgatar "${reward.name}" por ${reward.price} Gold?`)) return;
+
+      state.gold -= reward.price;
+
+      if (reward.isHpPotion) {
+        state.hp = Math.min(state.maxHp || 100, (state.hp || 0) + 50);
+        addLog('reward_redeem', `Usou Porção de Cura! HP restaurado para ${state.hp}/${state.maxHp}.`);
+      } else {
+        addLog('reward_redeem', `Resgatou recompensa: "${reward.name}" (-${reward.price} Gold).`);
+      }
+
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 40, spread: 50, origin: { y: 0.6 } });
+      }
+
+      saveState();
+      renderAll();
+    };
+
+    window.app.deleteReward = (rewardId) => {
+      if (!confirm('Excluir recompensa?')) return;
       state.rewards = state.rewards.filter(r => r.id !== rewardId);
       saveState();
       renderAll();
-      addLog(`Recompensa removida: "${removed ? removed.name : rewardId}"`);
     };
 
-    // ======================= RENDER ALL =======================
+    // ======================= EVENT BINDINGS =======================
+    document.getElementById('btnCreateTask').onclick = () => {
+      const title = document.getElementById('taskTitle').value.trim();
+      if (!title) return alert('Digite o nome da tarefa.');
+
+      const attrId = document.getElementById('taskAttr').value;
+      const type = document.getElementById('taskType').value;
+      const diff = document.getElementById('taskDiff').value;
+      const recurrence = document.getElementById('taskRecurrence').value;
+
+      const diffConfig = state.config.difficulties[diff] || { xp: 25, gold: 12, hp: 20 };
+
+      const newTask = {
+        id: 't-' + Date.now(),
+        title,
+        attrId,
+        type,
+        difficulty: diff,
+        recurrence,
+        completed: false,
+        xp: diffConfig.xp,
+        gold: diffConfig.gold,
+        hpPenalty: diffConfig.hp,
+        lastCompletedAt: null,
+        createdAt: Date.now()
+      };
+
+      state.tasks.push(newTask);
+      document.getElementById('taskTitle').value = '';
+      addLog('task_create', `Criou a tarefa: "${title}" (${type === 'negative' ? 'Hábito Negativo' : 'Positiva'})`);
+      saveState();
+      renderAll();
+    };
+
+    document.getElementById('btnCreateAttr').onclick = () => {
+      const nameInp = document.getElementById('attrName');
+      const name = nameInp.value.trim();
+      if (!name) return alert('Digite o nome do atributo.');
+
+      const colors = ['#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#10b981', '#ec4899', '#06b6d4'];
+      const icons = ['heartbeat', 'coins', 'bullseye', 'book', 'briefcase', 'dumbbell', 'brain'];
+      const randIdx = Math.floor(Math.random() * colors.length);
+
+      state.attributes.push({
+        id: 'attr-' + Date.now(),
+        name,
+        icon: icons[randIdx],
+        color: colors[randIdx]
+      });
+
+      nameInp.value = '';
+      saveState();
+      renderAll();
+    };
+
+    document.getElementById('btnCreateReward').onclick = () => {
+      const name = prompt('Nome da recompensa:');
+      if (!name) return;
+      const price = parseInt(prompt('Preço em Gold:'));
+      if (isNaN(price) || price <= 0) return alert('Preço inválido.');
+
+      state.rewards.push({
+        id: 'r-' + Date.now(),
+        name,
+        price
+      });
+
+      saveState();
+      renderAll();
+    };
+
+    document.getElementById('taskSearchInput').oninput = renderTasks;
+    document.getElementById('taskFilterAttr').onchange = renderTasks;
+
     function renderAll() {
-      renderAttributes();
+      renderTopStats();
       renderTasks();
+      renderAttributes();
       renderRewards();
       renderLogs();
-      updateStats();
       if (document.getElementById('tab-overview').classList.contains('active')) {
         initCharts();
       }
     }
 
-    // ======================= EVENTOS =======================
-    document.getElementById('addAttrBtn').addEventListener('click', () => {
-      const input = document.getElementById('newAttrName');
-      const name = input.value.trim();
-      if (!name) return alert('Digite o nome do atributo.');
-      state.attributes.push({ id: generateId(), name: name, icon: 'star' });
-      input.value = '';
-      saveState();
-      renderAll();
-      addLog(`Novo atributo criado: ${name}`);
-    });
-
-    document.getElementById('addTaskBtn').addEventListener('click', () => {
-      const title = document.getElementById('taskTitle').value.trim();
-      const attrId = document.getElementById('taskAttrSelect').value;
-      const difficulty = parseInt(document.getElementById('taskDifficulty').value);
-      const recurrence = document.getElementById('taskRecurrence').value;
-
-      if (!title) return alert('Digite o título da tarefa.');
-      if (!attrId) return alert('Crie um atributo primeiro.');
-
-      const xpMap = { 1: 10, 2: 25, 3: 50, 4: 100 };
-      const goldMap = { 1: 5, 2: 12, 3: 25, 4: 60 };
-
-      state.tasks.push({
-        id: generateId(),
-        title: title,
-        attrId: attrId,
-        difficulty: difficulty,
-        recurrence: recurrence,
-        completed: false,
-        xp: xpMap[difficulty],
-        gold: goldMap[difficulty],
-        createdAt: Date.now()
-      });
-      document.getElementById('taskTitle').value = '';
-      saveState();
-      renderAll();
-      addLog(`Nova tarefa: "${title}" (${getAttrName(attrId)})`);
-    });
-
-    document.getElementById('addRewardBtn').addEventListener('click', () => {
-      const name = prompt('Nome da recompensa:');
-      if (!name) return;
-      const price = parseInt(prompt('Preço em Gold:'));
-      if (isNaN(price) || price <= 0) return alert('Preço inválido.');
-      state.rewards.push({ id: generateId(), name: name, price: price });
-      saveState();
-      renderAll();
-      addLog(`Nova recompensa: "${name}" (${price} Gold)`);
-    });
-
-    // ======================= INICIALIZAÇÃO =======================
+    // Initialize
+    checkRecurrenceAndResets();
     renderAll();
+    setInterval(checkRecurrenceAndResets, 60000);
 
-    window.state = state;
   })();
 </script>
 </body>
