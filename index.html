@@ -1,17 +1,26 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0b0f1c">
+  <meta name="theme-color" content="#5f8ee4">
+  <meta name="apple-mobile-web-app-title" content="Gameficado">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Gamificação da Vida · Dashboard Produtivo</title>
+  <link rel="manifest" href="./manifest.json">
+  <title>Gameficado · Sistema de Produtividade Gamificada</title>
+  
+  <!-- CDNs Externos -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
+    /* ==========================================================================
+       DESIGN SYSTEM & CSS VARIABLES
+       ========================================================================== */
     :root {
+      /* Palette base - Dark (Default) */
       --bg: #0b0f1c;
       --card-bg: #141b2b;
       --card-inner: #0e1322;
@@ -20,14 +29,42 @@
       --text: #e1e9f0;
       --text-mid: #b0c8e0;
       --text-dim: #7a8ea8;
+      --text-strong: #ffffff;
+      
+      /* Accent Dinâmico */
       --accent: #5f8ee4;
       --accent-dark: #2d5a9c;
+      --accent-darker: #1e3a66;
+      
+      /* Gamification Tokens */
       --gold: #f5c542;
       --xp: #4cd964;
       --hp: #ef4444;
       --streak: #f97316;
+      --danger-bg: #3a1c1c;
+      --danger-border: #8b2626;
+
+      --shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
     }
 
+    [data-theme="light"] {
+      --bg: #f4f6f8;
+      --card-bg: #ffffff;
+      --card-inner: #f8fafc;
+      --border: #e2e8f0;
+      --border-light: #edf2f7;
+      --text: #334155;
+      --text-mid: #475569;
+      --text-dim: #94a3b8;
+      --text-strong: #0f172a;
+      
+      --danger-bg: #fef2f2;
+      --danger-border: #fecaca;
+
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Reset & CSS Base */
     * {
       margin: 0;
       padding: 0;
@@ -35,252 +72,369 @@
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
+
     html, body {
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       min-height: 100dvh;
       overflow-x: hidden;
+      transition: background 0.2s ease, color 0.2s ease;
     }
+
     body {
       padding: 12px max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left));
       padding-bottom: calc(84px + env(safe-area-inset-bottom));
       overscroll-behavior-y: contain;
     }
+
     .dashboard {
-      max-width: 1600px;
+      max-width: 1400px;
       margin: 0 auto;
     }
 
-    /* ============ TOP BAR ============ */
+    /* ==========================================================================
+       TOP BAR & STATS HEADER
+       ========================================================================== */
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: var(--card-bg);
       border-radius: 16px;
-      padding: 12px 14px;
+      padding: 12px 16px;
       margin-bottom: 12px;
       border: 1px solid var(--border);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+      box-shadow: var(--shadow);
       gap: 10px;
     }
+
     .top-bar-title {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text-mid);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-strong);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       flex-shrink: 0;
     }
+
     .top-bar-title i {
       color: var(--accent);
-      font-size: 1rem;
+      font-size: 1.1rem;
     }
-    .top-bar-title .title-text {
-      display: none;
+
+    .level-badge {
+      background: var(--accent-darker);
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border: 1px solid var(--accent);
     }
+
     .top-bar-stats {
       display: flex;
-      gap: 6px;
+      gap: 8px;
       flex: 1;
       justify-content: flex-end;
       min-width: 0;
       flex-wrap: wrap;
     }
+
     .badge {
       background: var(--card-inner);
-      border: 1px solid #253044;
-      padding: 6px 10px;
+      border: 1px solid var(--border);
+      padding: 6px 12px;
       border-radius: 20px;
       font-weight: 600;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      font-size: 0.75rem;
+      gap: 6px;
+      font-size: 0.78rem;
       white-space: nowrap;
       flex-shrink: 0;
     }
+
     .badge.hp { color: var(--hp); }
     .badge.streak { color: var(--streak); }
     .badge.gold { color: var(--gold); }
     .badge.xp { color: var(--xp); }
     .badge.neutral { color: var(--text-mid); }
-    .badge i { font-size: 0.7rem; }
 
-    /* ============ TABS: DESKTOP ============ */
-    .tabs {
-      display: flex;
-      gap: 4px;
+    /* Level Progress Bar Container */
+    .level-progress-container {
       background: var(--card-bg);
-      border-radius: 14px;
-      padding: 5px;
+      border-radius: 12px;
+      padding: 10px 16px;
       margin-bottom: 12px;
       border: 1px solid var(--border);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .level-progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-mid);
+    }
+
+    .progress-bar-bg {
+      background: var(--card-inner);
+      border-radius: 10px;
+      height: 10px;
+      width: 100%;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .progress-bar-fill {
+      background: linear-gradient(90deg, var(--accent) 0%, var(--xp) 100%);
+      height: 100%;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    /* ==========================================================================
+       DESKTOP TABS & MOBILE NAV
+       ========================================================================== */
+    .tabs {
+      display: flex;
+      gap: 6px;
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 6px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
       overflow-x: auto;
       scrollbar-width: none;
     }
     .tabs::-webkit-scrollbar { display: none; }
+
     .tab-btn {
       background: transparent;
       border: none;
       color: var(--text-dim);
-      padding: 10px 14px;
+      padding: 10px 16px;
       border-radius: 10px;
       cursor: pointer;
-      font-weight: 500;
+      font-weight: 600;
       font-size: 0.85rem;
       display: flex;
       align-items: center;
-      gap: 6px;
-      transition: 0.15s;
+      gap: 8px;
+      transition: 0.2s ease;
       white-space: nowrap;
       flex-shrink: 0;
       min-height: 44px;
     }
-    .tab-btn:active {
-      transform: scale(0.96);
-    }
+
+    .tab-btn:hover { color: var(--text); }
     .tab-btn.active {
-      background: var(--accent-dark);
-      color: white;
-      box-shadow: 0 4px 10px rgba(45, 90, 156, 0.4);
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
+
     .tab-content {
       display: none;
-      animation: fadeIn 0.2s ease;
+      animation: fadeIn 0.25s ease-out;
     }
     .tab-content.active { display: block; }
+
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
+      from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ============ CARDS ============ */
+    /* Mobile Nav */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card-bg);
+      border-top: 1px solid var(--border);
+      padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+      z-index: 100;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .mobile-nav-inner {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .mobile-nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      padding: 6px 2px;
+      border-radius: 8px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      cursor: pointer;
+      min-height: 50px;
+    }
+
+    .mobile-nav-btn i { font-size: 1.15rem; }
+    .mobile-nav-btn.active {
+      color: var(--accent);
+      background: var(--card-inner);
+    }
+
+    /* ==========================================================================
+       CARDS & LAYOUT COMPONENTS
+       ========================================================================== */
     .card {
       background: var(--card-bg);
       border-radius: 16px;
-      padding: 14px 16px;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.02);
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
       border: 1px solid var(--border);
       margin-bottom: 12px;
     }
-    .card:last-child { margin-bottom: 0; }
+
     .card h2 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 12px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 14px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      color: var(--text-mid);
+      gap: 10px;
+      color: var(--text-strong);
       border-bottom: 1px solid var(--border);
       padding-bottom: 10px;
     }
-    .card h2 i {
-      color: var(--accent);
-      width: 20px;
-      text-align: center;
-      font-size: 0.95rem;
+
+    .card h2 i { color: var(--accent); }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
     }
 
-    /* ============ STATS ============ */
+    @media (min-width: 900px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* Metric Counters */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-bottom: 12px;
+      gap: 10px;
+      margin-bottom: 14px;
     }
+
+    @media (min-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(5, 1fr); }
+    }
+
     .stat-item {
       background: var(--card-inner);
       border-radius: 12px;
-      padding: 10px 8px;
+      padding: 12px 10px;
       text-align: center;
-      border: 1px solid #253044;
+      border: 1px solid var(--border);
     }
+
     .stat-label {
-      font-size: 0.65rem;
+      font-size: 0.68rem;
       text-transform: uppercase;
-      letter-spacing: 0.4px;
+      letter-spacing: 0.5px;
       color: var(--text-dim);
-      margin-bottom: 2px;
-    }
-    .stat-value {
-      font-size: 1.4rem;
       font-weight: 700;
-      color: #d6e6ff;
-      line-height: 1.1;
+      margin-bottom: 4px;
     }
-    .stat-value.gold { color: var(--gold); }
+
+    .stat-value {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-strong);
+    }
+
     .stat-value.xp { color: var(--xp); }
-    .stat-value.hp { color: var(--hp); }
+    .stat-value.gold { color: var(--gold); }
     .stat-value.streak { color: var(--streak); }
 
-    /* ============ CHARTS ============ */
+    /* Charts Container */
     .charts-row {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 10px;
-      margin-top: 10px;
+      gap: 12px;
+      margin-top: 12px;
     }
+
+    @media (min-width: 768px) {
+      .charts-row { grid-template-columns: 1fr 1fr; }
+    }
+
     .chart-container {
       background: var(--card-inner);
       border-radius: 12px;
-      padding: 10px;
-      border: 1px solid #253044;
+      padding: 12px;
+      border: 1px solid var(--border);
       position: relative;
-      height: 220px;
-    }
-    .chart-container canvas {
-      width: 100% !important;
-      height: 100% !important;
+      height: 240px;
     }
 
-    /* ============ FORMULÁRIOS ============ */
-    .input-group {
+    /* ==========================================================================
+       FORMS & UI INPUTS
+       ========================================================================== */
+    .form-group {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       margin-bottom: 12px;
+      flex: 1;
+      min-width: 140px;
     }
+
     .form-row {
       display: flex;
-      gap: 8px;
-      width: 100%;
+      gap: 10px;
       flex-wrap: wrap;
     }
-    .form-group {
-      flex: 1;
-      min-width: 130px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .form-group label {
-      font-size: 0.72rem;
-      color: var(--text-dim);
-      font-weight: 600;
+
+    label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-mid);
       text-transform: uppercase;
+      letter-spacing: 0.4px;
     }
+
     input, select, button {
       background: var(--card-inner);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 14px;
+      border-radius: 10px;
+      padding: 10px 14px;
       color: var(--text);
-      font-size: 16px;
+      font-size: 16px; /* Evita auto-zoom iOS */
       outline: none;
-      transition: 0.15s;
-      width: 100%;
+      transition: all 0.2s ease;
       min-height: 44px;
-      font-family: inherit;
     }
+
     input:focus, select:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 2px rgba(95, 142, 228, 0.2);
+      box-shadow: 0 0 0 3px rgba(95, 142, 228, 0.15);
     }
+
     select {
       appearance: none;
       -webkit-appearance: none;
@@ -289,109 +443,197 @@
       background-position: right 14px center;
       padding-right: 36px;
     }
+
     button {
-      background: #1e2a3e;
-      border: 1px solid #3a4a66;
+      background: var(--card-inner);
+      border: 1px solid var(--border);
       cursor: pointer;
       font-weight: 600;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      width: auto;
-      min-height: 44px;
-    }
-    button:active { transform: scale(0.97); }
-    button.primary {
-      background: var(--accent-dark);
-      border-color: #3f7ad4;
-      color: white;
-    }
-    button.danger {
-      background: #4a1f1f;
-      border-color: #9c3a3a;
-      color: #fca5a5;
-    }
-    button.small {
-      padding: 8px 12px;
-      font-size: 0.8rem;
-      border-radius: 10px;
-      min-height: 36px;
-      min-width: 36px;
-    }
-    button:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-full { width: 100%; }
-    :focus-visible {
-      outline: 2px solid #8db7ff;
-      outline-offset: 2px;
     }
 
-    /* ============ LISTAS & ITEM CARDS ============ */
+    button:active { transform: scale(0.98); }
+
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    button.primary:hover {
+      background: var(--accent-dark);
+    }
+
+    button.danger {
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+      color: var(--hp);
+    }
+
+    button.small {
+      min-height: 36px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      border-radius: 8px;
+    }
+
+    /* Choice Grid Pickers (Color & Icons) */
+    .picker-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .color-swatch {
+      width: 100%;
+      height: 38px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.15s;
+    }
+
+    .color-swatch:hover { transform: scale(1.08); }
+    .color-swatch.selected { border-color: var(--text-strong); transform: scale(1.1); }
+
+    .icon-swatch {
+      height: 38px;
+      border-radius: 8px;
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--text-mid);
+    }
+
+    .icon-swatch.selected {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* Custom Checkbox Days Grid */
+    .days-picker {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .day-btn {
+      flex: 1;
+      min-width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card-inner);
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .day-btn.selected {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* ==========================================================================
+       LIST ITEMS & CARDS
+       ========================================================================== */
     .item-list {
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
+
     .item-card {
       background: var(--card-inner);
       border-radius: 12px;
-      padding: 12px;
-      border: 1px solid var(--border-light);
+      padding: 12px 14px;
+      border: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
       flex-wrap: wrap;
     }
+
+    .item-card.completed {
+      opacity: 0.65;
+    }
+
+    .item-card.completed .item-title {
+      text-decoration: line-through;
+    }
+
     .item-main {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       flex: 1;
       min-width: 200px;
     }
+
     .item-icon-badge {
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 1.1rem;
-      color: #fff;
+      color: #ffffff;
       flex-shrink: 0;
     }
+
     .item-details {
       display: flex;
       flex-direction: column;
       gap: 4px;
       min-width: 0;
     }
+
     .item-title {
       font-weight: 600;
-      font-size: 0.92rem;
-      color: var(--text);
+      font-size: 0.95rem;
+      color: var(--text-strong);
       word-break: break-word;
     }
+
     .item-tags {
       display: flex;
       gap: 6px;
       flex-wrap: wrap;
       align-items: center;
     }
+
     .tag-chip {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border);
       padding: 2px 8px;
       border-radius: 12px;
-      font-size: 0.68rem;
+      font-size: 0.7rem;
       color: var(--text-dim);
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      font-weight: 600;
     }
-    .tag-chip.xp { color: var(--xp); border-color: rgba(76, 217, 100, 0.2); }
-    .tag-chip.gold { color: var(--gold); border-color: rgba(245, 197, 66, 0.2); }
+
+    .tag-chip.xp { color: var(--xp); border-color: rgba(76, 217, 100, 0.3); }
+    .tag-chip.gold { color: var(--gold); border-color: rgba(245, 197, 66, 0.3); }
+
     .item-actions {
       display: flex;
       gap: 6px;
@@ -400,109 +642,63 @@
     }
 
     .empty-state {
-      color: var(--text-dim);
       text-align: center;
-      padding: 28px 0;
+      padding: 32px 16px;
+      color: var(--text-dim);
       font-style: italic;
       font-size: 0.9rem;
     }
 
-    /* ============ LOGS ============ */
-    .history-log {
-      font-size: 0.82rem;
-      color: #9aaec4;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      padding: 10px 4px;
+    /* Logs List */
+    .log-item {
+      padding: 10px 0;
       border-bottom: 1px solid var(--border-light);
-      word-break: break-word;
-      line-height: 1.4;
-    }
-    .history-log span {
-      font-size: 0.7rem;
-      color: var(--text-dim);
-    }
-    .history-log:last-child { border-bottom: none; }
-
-    .footer-note {
-      color: var(--text-dim);
-      font-size: 0.72rem;
-      margin-top: 8px;
-      line-height: 1.4;
-    }
-
-    /* ============ NAV INFERIOR MOBILE ============ */
-    .mobile-nav {
-      display: none;
-      position: fixed;
-      bottom: 0;
-      left: env(safe-area-inset-left);
-      right: env(safe-area-inset-right);
-      background: var(--card-bg);
-      border-top: 1px solid var(--border);
-      padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
-      z-index: 100;
-      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
-    }
-    .mobile-nav-inner {
-      display: flex;
-      justify-content: space-around;
-      align-items: stretch;
-      gap: 2px;
-    }
-    .mobile-nav-btn {
-      flex: 1;
+      font-size: 0.85rem;
+      color: var(--text-mid);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      background: transparent;
-      border: none;
+      gap: 2px;
+    }
+
+    .log-item:last-child { border-bottom: none; }
+    .log-date { font-size: 0.72rem; color: var(--text-dim); }
+
+    .filter-chips {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .filter-chips::-webkit-scrollbar { display: none; }
+
+    .chip-btn {
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--card-inner);
+      border: 1px solid var(--border);
       color: var(--text-dim);
-      padding: 8px 4px;
-      border-radius: 10px;
-      font-size: 0.65rem;
-      font-weight: 500;
       cursor: pointer;
-      transition: 0.15s;
-      min-height: 52px;
-    }
-    .mobile-nav-btn i {
-      font-size: 1.1rem;
-    }
-    .mobile-nav-btn.active {
-      color: var(--accent);
-      background: #1e2a3e;
-    }
-    .mobile-nav-btn:active { transform: scale(0.94); }
-
-    /* ============ RESPONSIVO ============ */
-    @media (min-width: 768px) {
-      .top-bar-title .title-text { display: inline; }
-      .stats-grid { grid-template-columns: repeat(5, 1fr); }
-      .charts-row { grid-template-columns: 1fr 1fr; }
-      .chart-container { height: 240px; }
-      .card { padding: 20px 22px; }
-      .card h2 { font-size: 1.1rem; }
+      white-space: nowrap;
     }
 
+    .chip-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* Responsividade */
     @media (max-width: 767px) {
-      body {
-        padding: 10px max(10px, env(safe-area-inset-right)) 0 max(10px, env(safe-area-inset-left));
-        padding-bottom: calc(80px + env(safe-area-inset-bottom));
-      }
       .tabs { display: none; }
       .mobile-nav { display: block; }
-      .top-bar { padding: 10px 12px; margin-bottom: 10px; }
-      .top-bar-title i { font-size: 1.15rem; }
-      .badge { padding: 5px 8px; font-size: 0.7rem; }
-      .card { padding: 14px; border-radius: 14px; margin-bottom: 10px; }
-      .stat-value { font-size: 1.2rem; }
+      .top-bar-title span.title-text { display: none; }
+      .card { padding: 14px; }
       .item-main { min-width: 100%; }
       .item-actions { width: 100%; justify-content: flex-end; }
-      .chart-container { height: 190px; }
     }
   </style>
 </head>
@@ -510,45 +706,64 @@
 
 <div class="dashboard">
 
-  <!-- TOP BAR -->
+  <!-- ================= TOP BAR STATS HEADER ================= -->
   <header class="top-bar">
     <div class="top-bar-title">
       <i class="fas fa-gamepad"></i>
-      <span class="title-text">Gamificação da Vida</span>
+      <span class="title-text">Gameficado</span>
+      <span class="level-badge">Nível <span id="topLevel">1</span></span>
     </div>
     <div class="top-bar-stats">
-      <span class="badge hp" title="Vida (HP)"><i class="fas fa-heart"></i> <span id="topHP">100</span>/<span id="topMaxHP">100</span></span>
-      <span class="badge streak" title="Sequência Diária (Streak)"><i class="fas fa-fire"></i> <span id="topStreak">0</span>d</span>
-      <span class="badge xp" title="XP Total"><i class="fas fa-star"></i> <span id="topXP">0</span></span>
-      <span class="badge gold" title="Gold"><i class="fas fa-coins"></i> <span id="topGold">0</span></span>
-      <span class="badge neutral" title="Tarefas Concluídas"><i class="fas fa-check-circle"></i> <span id="topCompleted">0</span></span>
+      <span class="badge hp" title="Bateria de Disciplina"><i class="fas fa-battery-three-quarters"></i> <span id="topHP">100</span>%</span>
+      <span class="badge streak" title="Sequência Diária"><i class="fas fa-fire"></i> <span id="topStreak">0</span>d</span>
+      <span class="badge xp" title="Foco Acumulado (XP)"><i class="fas fa-star"></i> <span id="topXP">0</span></span>
+      <span class="badge gold" title="Créditos"><i class="fas fa-coins"></i> <span id="topGold">0</span></span>
     </div>
   </header>
 
+  <!-- LEVEL PROGRESS BAR -->
+  <div class="level-progress-container">
+    <div class="level-progress-header">
+      <span><i class="fas fa-bullseye"></i> Progresso do Nível <span id="lblLevel">1</span></span>
+      <span id="lblLevelProgress">0 / 100 XP</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="levelProgressBar"></div>
+    </div>
+  </div>
+
   <!-- BANNER BÓNUS DE RECUPERAÇÃO -->
-  <div id="comebackBanner" class="card" style="display:none; background: linear-gradient(135deg, rgba(245,197,66,0.15), rgba(239,68,68,0.15)); border-color: var(--gold); margin-bottom:12px;">
+  <div id="comebackBanner" class="card" style="display:none; background: linear-gradient(135deg, rgba(245,197,66,0.15), rgba(95,142,228,0.15)); border-color: var(--gold); margin-bottom:12px;">
     <div style="display:flex; align-items:center; gap:12px;">
       <i class="fas fa-bolt" style="font-size:1.8rem; color:var(--gold);"></i>
       <div>
-        <strong style="color:var(--gold); font-size:1rem;">⚡ Bónus de Recuperação Ativo (2x XP)!</strong>
-        <p style="font-size:0.82rem; color:var(--text-mid); margin-top:2px;">O seu streak foi quebrado recentemente. Esta semana todas as tarefas estão a conceder o <strong>dobro de XP</strong> para te ajudar a retomar o ritmo!</p>
+        <strong style="color:var(--gold); font-size:0.95rem;">⚡ Bónus de Recuperação Ativo (2x XP)!</strong>
+        <p style="font-size:0.82rem; color:var(--text-mid); margin-top:2px;">A tua sequência foi interrompida recentemente. Esta semana todas as missões concedem o <strong>dobro de Foco (2x XP)</strong> para apoiar a tua retoma!</p>
       </div>
     </div>
   </div>
 
   <!-- NAVEGAÇÃO DESKTOP -->
-  <nav class="tabs" aria-label="Navegação desktop">
+  <nav class="tabs" aria-label="Navegação Principal Desktop">
     <button class="tab-btn active" data-tab="tab-overview"><i class="fas fa-chart-pie"></i> Visão Geral</button>
     <button class="tab-btn" data-tab="tab-tasks"><i class="fas fa-list-check"></i> Tarefas</button>
     <button class="tab-btn" data-tab="tab-attributes"><i class="fas fa-tags"></i> Atributos</button>
     <button class="tab-btn" data-tab="tab-shop"><i class="fas fa-store"></i> Loja</button>
     <button class="tab-btn" data-tab="tab-logs"><i class="fas fa-clock-rotate-left"></i> Histórico</button>
+    <button class="tab-btn" data-tab="tab-config"><i class="fas fa-gear"></i> Definições</button>
   </nav>
 
-  <!-- TAB: VISÃO GERAL -->
+  <!-- ================= TAB: VISÃO GERAL (AÇÃO HOJE) ================= -->
   <section class="tab-content active" id="tab-overview">
+    <!-- Secção 1: Missões de Hoje (Ação Primeiro) -->
     <div class="card">
-      <h2><i class="fas fa-chart-pie"></i> Painel de Progresso</h2>
+      <h2><i class="fas fa-calendar-day"></i> Missões de Hoje</h2>
+      <div class="item-list" id="todayTasksList"></div>
+    </div>
+
+    <!-- Secção 2: Métricas de Desempenho -->
+    <div class="card">
+      <h2><i class="fas fa-chart-line"></i> Métricas Gerais</h2>
       <div class="stats-grid">
         <div class="stat-item">
           <div class="stat-label">Sequência</div>
@@ -559,86 +774,106 @@
           <div class="stat-value xp" id="dashXP">0</div>
         </div>
         <div class="stat-item">
-          <div class="stat-label">Gold</div>
+          <div class="stat-label">Créditos</div>
           <div class="stat-value gold" id="dashGold">0</div>
         </div>
         <div class="stat-item">
-          <div class="stat-label">Concluídas</div>
-          <div class="stat-value" id="dashCompleted">0</div>
+          <div class="stat-label">Concluídas Hoje</div>
+          <div class="stat-value" id="dashDoneToday">0</div>
         </div>
         <div class="stat-item">
-          <div class="stat-label">Ativas</div>
-          <div class="stat-value" id="dashActive">0</div>
+          <div class="stat-label">Disciplinas Ativas</div>
+          <div class="stat-value" id="dashActiveTasks">0</div>
         </div>
       </div>
 
+      <!-- Grelha de Gráficos Dinâmicos -->
+      <div id="noChartsMsg" class="empty-state" style="display:none;">Nenhum gráfico visível. Ativa os gráficos nas Definições.</div>
       <div class="charts-row">
-        <div class="chart-container"><canvas id="xpByAttrChart"></canvas></div>
-        <div class="chart-container"><canvas id="completionChart"></canvas></div>
+        <div class="chart-container" id="container-chart-xp"><canvas id="xpByAttrChart"></canvas></div>
+        <div class="chart-container" id="container-chart-completion"><canvas id="completionChart"></canvas></div>
       </div>
       <div class="charts-row">
-        <div class="chart-container"><canvas id="evolutionChart"></canvas></div>
-        <div class="chart-container"><canvas id="focusDistChart"></canvas></div>
+        <div class="chart-container" id="container-chart-evolution"><canvas id="evolutionChart"></canvas></div>
+        <div class="chart-container" id="container-chart-focus"><canvas id="focusDistChart"></canvas></div>
       </div>
     </div>
   </section>
 
-  <!-- TAB: TAREFAS -->
+  <!-- ================= TAB: TAREFAS ================= -->
   <section class="tab-content" id="tab-tasks">
     <div class="card">
-      <h2><i class="fas fa-plus-circle"></i> Nova Tarefa ou Hábito</h2>
-      <div class="input-group">
-        <div class="form-row">
-          <div class="form-group" style="flex:2;">
-            <label for="taskTitle">Nome da Tarefa / Hábito</label>
-            <input type="text" id="taskTitle" placeholder="Ex: Exercitar 30min ou Evitar Fast-food">
-          </div>
-          <div class="form-group">
-            <label for="taskAttr">Atributo Pilar</label>
-            <select id="taskAttr"></select>
-          </div>
+      <h2 id="taskFormTitle"><i class="fas fa-plus-circle"></i> Criar Tarefa / Hábito</h2>
+      <input type="hidden" id="editTaskId" value="">
+      
+      <div class="form-group">
+        <label for="taskTitle">Nome da Tarefa / Hábito</label>
+        <input type="text" id="taskTitle" placeholder="Ex: Ler 15 páginas ou Evitar Procrastinação">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="taskAttr">Atributo Pilar</label>
+          <select id="taskAttr"></select>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="taskType">Tipo de Tarefa</label>
-            <select id="taskType">
-              <option value="positive">Positiva (Ganhar XP e Gold)</option>
-              <option value="negative">Hábito Negativo (Perde HP e Gold se ceder)</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="taskDiff">Dificuldade / Impacto</label>
-            <select id="taskDiff">
-              <option value="easy">Fácil / Leve</option>
-              <option value="medium" selected>Médio / Moderado</option>
-              <option value="hard">Difícil / Grave</option>
-              <option value="epic">Épico / Severo</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="taskRecurrence">Recorrência</label>
-            <select id="taskRecurrence">
-              <option value="once">Única</option>
-              <option value="daily" selected>Diária</option>
-              <option value="weekly">Semanal</option>
-            </select>
-          </div>
+        <div class="form-group">
+          <label for="taskType">Tipo de Atividade</label>
+          <select id="taskType">
+            <option value="positive">Positiva (Ganhar XP e Créditos)</option>
+            <option value="negative">Hábito Negativo (Perde Bateria e Créditos)</option>
+          </select>
         </div>
 
-        <button class="primary btn-full" id="btnCreateTask" style="margin-top:4px;"><i class="fas fa-plus"></i> Criar Tarefa</button>
+        <div class="form-group">
+          <label for="taskDiff">Dificuldade / Impacto</label>
+          <select id="taskDiff">
+            <option value="easy">Fácil</option>
+            <option value="medium" selected>Médio</option>
+            <option value="hard">Difícil</option>
+            <option value="epic">Épico</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="taskRecurrence">Recorrência</label>
+          <select id="taskRecurrence">
+            <option value="once">Única</option>
+            <option value="daily" selected>Diária</option>
+            <option value="weekly">Semanal</option>
+            <option value="custom">Personalizada</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Dias da Semana (Personalizada) -->
+      <div class="form-group" id="customDaysGroup" style="display:none;">
+        <label>Dias da Semana Ativos</label>
+        <div class="days-picker" id="daysPicker">
+          <div class="day-btn" data-day="1">Seg</div>
+          <div class="day-btn" data-day="2">Ter</div>
+          <div class="day-btn" data-day="3">Qua</div>
+          <div class="day-btn" data-day="4">Qui</div>
+          <div class="day-btn" data-day="5">Sex</div>
+          <div class="day-btn" data-day="6">Sáb</div>
+          <div class="day-btn" data-day="0">Dom</div>
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-top:8px;">
+        <button class="primary" id="btnSaveTask" style="flex:2;"><i class="fas fa-check"></i> Guardar Tarefa</button>
+        <button id="btnCancelEditTask" style="display:none; flex:1;"><i class="fas fa-times"></i> Cancelar</button>
       </div>
     </div>
 
+    <!-- Lista com Filtros -->
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
-        <h2><i class="fas fa-tasks"></i> Suas Tarefas</h2>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; flex:1; max-width:400px;">
-          <input type="text" id="taskSearchInput" placeholder="Pesquisar..." style="min-height:36px; padding:6px 10px; font-size:0.85rem;">
-          <select id="taskFilterAttr" style="min-height:36px; padding:6px 10px; font-size:0.85rem;">
-            <option value="all">Todos os Atributos</option>
+        <h2><i class="fas fa-tasks"></i> Gestão de Tarefas</h2>
+        <div style="display:flex; gap:8px; flex:1; max-width:450px;">
+          <input type="text" id="taskSearchInput" placeholder="Pesquisar..." style="min-height:38px; padding:6px 12px; font-size:0.85rem;">
+          <select id="taskFilterAttr" style="min-height:38px; padding:6px 10px; font-size:0.85rem;">
+            <option value="all">Todos os Pilares</option>
           </select>
         </div>
       </div>
@@ -646,61 +881,272 @@
     </div>
   </section>
 
-  <!-- TAB: ATRIBUTOS -->
+  <!-- ================= TAB: ATRIBUTOS ================= -->
   <section class="tab-content" id="tab-attributes">
     <div class="card">
-      <h2><i class="fas fa-plus-circle"></i> Criar Atributo</h2>
-      <div class="input-group">
-        <div class="form-row">
-          <input type="text" id="attrName" placeholder="Nome (ex: Saúde, Finanças)" style="flex:2;">
-          <button class="primary" id="btnCreateAttr"><i class="fas fa-plus"></i> Criar Atributo</button>
-        </div>
+      <h2><i class="fas fa-plus-circle"></i> Criar Pilar de Vida</h2>
+      <div class="form-group">
+        <label for="attrName">Nome do Pilar</label>
+        <input type="text" id="attrName" placeholder="Ex: Finanças, Saúde, Carreira...">
       </div>
+
+      <div class="form-group">
+        <label>Escolher Ícone</label>
+        <div class="picker-grid" id="iconPicker"></div>
+      </div>
+
+      <div class="form-group">
+        <label>Escolher Cor</label>
+        <div class="picker-grid" id="colorPicker"></div>
+      </div>
+
+      <button class="primary" id="btnCreateAttr" style="margin-top:10px; width:100%;"><i class="fas fa-plus"></i> Guardar Pilar</button>
     </div>
 
     <div class="card">
-      <h2><i class="fas fa-tags"></i> Atributos Ativos</h2>
+      <h2><i class="fas fa-tags"></i> Pilares Ativos</h2>
       <div class="item-list" id="attributesList"></div>
     </div>
   </section>
 
-  <!-- TAB: LOJA -->
+  <!-- ================= TAB: LOJA ================= -->
   <section class="tab-content" id="tab-shop">
     <div class="card">
-      <h2><i class="fas fa-store"></i> Loja de Recompensas</h2>
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <span class="badge gold" style="font-size:0.9rem;"><i class="fas fa-coins"></i> Saldo: <strong id="shopGold">0</strong> Gold</span>
-        <button class="primary small" id="btnCreateReward"><i class="fas fa-plus"></i> Novo Prêmio</button>
+      <h2><i class="fas fa-plus-circle"></i> Criar Recompensa</h2>
+      <div class="form-row">
+        <div class="form-group" style="flex:2;">
+          <label for="rewardName">Nome do Prêmio</label>
+          <input type="text" id="rewardName" placeholder="Ex: 1h de Videojogos ou Jantar Especial">
+        </div>
+        <div class="form-group">
+          <label for="rewardPrice">Preço (Créditos)</label>
+          <input type="number" id="rewardPrice" value="50" min="1">
+        </div>
       </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="rewardLimit">Limite de Stock</label>
+          <input type="number" id="rewardLimit" value="0" min="0" placeholder="0 = Ilimitado">
+        </div>
+        <div class="form-group">
+          <label for="rewardCycle">Ciclo de Renovação</label>
+          <select id="rewardCycle">
+            <option value="none">Sem Limite</option>
+            <option value="daily">Diário</option>
+            <option value="weekly">Semanal</option>
+            <option value="monthly">Mensal</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="primary" id="btnCreateReward" style="width:100%; margin-top:8px;"><i class="fas fa-gift"></i> Adicionar Recompensa</button>
+    </div>
+
+    <div class="card">
+      <h2><i class="fas fa-store"></i> Loja de Recompensas</h2>
       <div class="item-list" id="rewardsList"></div>
     </div>
   </section>
 
-  <!-- TAB: HISTÓRICO -->
+  <!-- ================= TAB: HISTÓRICO & LOGS ================= -->
   <section class="tab-content" id="tab-logs">
     <div class="card">
-      <h2><i class="fas fa-clock-rotate-left"></i> Histórico de Atividades</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+        <h2><i class="fas fa-clock-rotate-left"></i> Histórico de Registos</h2>
+        <button class="small" id="btnExportCSV"><i class="fas fa-file-csv"></i> Exportar CSV</button>
+      </div>
+
+      <!-- Filtros por tipo -->
+      <div class="filter-chips">
+        <button class="chip-btn active" data-filter="all">Todos</button>
+        <button class="chip-btn" data-filter="task_complete">Conclusões</button>
+        <button class="chip-btn" data-filter="reward_redeem">Recompensas</button>
+        <button class="chip-btn" data-filter="create">Criações</button>
+        <button class="chip-btn" data-filter="delete">Remoções</button>
+        <button class="chip-btn" data-filter="system">Sistema</button>
+      </div>
+
       <div id="logsList"></div>
+    </div>
+  </section>
+
+  <!-- ================= TAB: DEFINIÇÕES / CONFIG ================= -->
+  <section class="tab-content" id="tab-config">
+    <!-- 1. Aparência -->
+    <div class="card">
+      <h2><i class="fas fa-palette"></i> Aparência e Tema</h2>
+      <div class="form-group">
+        <label>Tema de Cores</label>
+        <div class="form-row">
+          <button id="btnThemeDark" class="primary" style="flex:1;"><i class="fas fa-moon"></i> Modo Escuro</button>
+          <button id="btnThemeLight" style="flex:1;"><i class="fas fa-sun"></i> Modo Claro</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Cor de Destaque (Accent)</label>
+        <div class="picker-grid" id="accentPicker"></div>
+      </div>
+    </div>
+
+    <!-- 2. Dificuldades -->
+    <div class="card">
+      <h2><i class="fas fa-sliders"></i> Níveis de Dificuldade (XP & Créditos)</h2>
+      <p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:12px;">Altera os valores atribuídos a tarefas criadas futuramente.</p>
+      
+      <div class="grid-2">
+        <div class="stat-item" style="text-align:left;">
+          <strong>Fácil</strong>
+          <div class="form-row" style="margin-top:6px;">
+            <div class="form-group"><label>XP</label><input type="number" id="diff_easy_xp"></div>
+            <div class="form-group"><label>Créditos</label><input type="number" id="diff_easy_gold"></div>
+          </div>
+        </div>
+
+        <div class="stat-item" style="text-align:left;">
+          <strong>Médio</strong>
+          <div class="form-row" style="margin-top:6px;">
+            <div class="form-group"><label>XP</label><input type="number" id="diff_medium_xp"></div>
+            <div class="form-group"><label>Créditos</label><input type="number" id="diff_medium_gold"></div>
+          </div>
+        </div>
+
+        <div class="stat-item" style="text-align:left;">
+          <strong>Difícil</strong>
+          <div class="form-row" style="margin-top:6px;">
+            <div class="form-group"><label>XP</label><input type="number" id="diff_hard_xp"></div>
+            <div class="form-group"><label>Créditos</label><input type="number" id="diff_hard_gold"></div>
+          </div>
+        </div>
+
+        <div class="stat-item" style="text-align:left;">
+          <strong>Épico</strong>
+          <div class="form-row" style="margin-top:6px;">
+            <div class="form-group"><label>XP</label><input type="number" id="diff_epic_xp"></div>
+            <div class="form-group"><label>Créditos</label><input type="number" id="diff_epic_gold"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Configuração de Gráficos -->
+    <div class="card">
+      <h2><i class="fas fa-chart-pie"></i> Personalização de Gráficos</h2>
+      <div class="item-list">
+        
+        <div class="item-card">
+          <span>XP por Atributo</span>
+          <div class="form-row" style="align-items:center;">
+            <label><input type="checkbox" id="cfg_chart_xp_visible"> Visível</label>
+            <select id="cfg_chart_xp_type">
+              <option value="bar">Barra</option>
+              <option value="line">Linha</option>
+              <option value="pie">Pizza</option>
+              <option value="doughnut">Rosca</option>
+              <option value="polarArea">Polar</option>
+              <option value="radar">Radar</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="item-card">
+          <span>Taxa de Conclusão</span>
+          <div class="form-row" style="align-items:center;">
+            <label><input type="checkbox" id="cfg_chart_completion_visible"> Visível</label>
+            <select id="cfg_chart_completion_type">
+              <option value="doughnut">Rosca</option>
+              <option value="pie">Pizza</option>
+              <option value="bar">Barra</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="item-card">
+          <span>Evolução Diária</span>
+          <div class="form-row" style="align-items:center;">
+            <label><input type="checkbox" id="cfg_chart_evolution_visible"> Visível</label>
+            <select id="cfg_chart_evolution_type">
+              <option value="line">Linha</option>
+              <option value="bar">Barra</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="item-card">
+          <span>Distribuição de Foco</span>
+          <div class="form-row" style="align-items:center;">
+            <label><input type="checkbox" id="cfg_chart_focus_visible"> Visível</label>
+            <select id="cfg_chart_focus_type">
+              <option value="polarArea">Polar</option>
+              <option value="radar">Radar</option>
+              <option value="pie">Pizza</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 4. Dados & Segurança -->
+    <div class="card">
+      <h2><i class="fas fa-database"></i> Gestão de Dados</h2>
+      <div class="form-row" style="gap:10px;">
+        <button class="primary" id="btnExportJSON"><i class="fas fa-download"></i> Exportar JSON</button>
+        <button class="primary" id="btnImportJSONTrigger"><i class="fas fa-upload"></i> Importar JSON</button>
+        <input type="file" id="importFileInput" accept=".json" style="display:none;">
+      </div>
+
+      <div style="margin-top:12px;" id="backupRestoreSection"></div>
+
+      <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:12px;">
+        <button class="danger" id="btnResetAll" style="width:100%;"><i class="fas fa-trash-can"></i> Resetar Todos os Dados</button>
+      </div>
     </div>
   </section>
 
 </div>
 
 <!-- NAV INFERIOR MOBILE -->
-<nav class="mobile-nav" aria-label="Navegação móvel">
+<nav class="mobile-nav" aria-label="Navegação Principal Mobile">
   <div class="mobile-nav-inner">
     <button class="mobile-nav-btn active" data-tab="tab-overview"><i class="fas fa-chart-pie"></i><span>Painel</span></button>
     <button class="mobile-nav-btn" data-tab="tab-tasks"><i class="fas fa-list-check"></i><span>Tarefas</span></button>
     <button class="mobile-nav-btn" data-tab="tab-attributes"><i class="fas fa-tags"></i><span>Atributos</span></button>
     <button class="mobile-nav-btn" data-tab="tab-shop"><i class="fas fa-store"></i><span>Loja</span></button>
     <button class="mobile-nav-btn" data-tab="tab-logs"><i class="fas fa-clock-rotate-left"></i><span>Histórico</span></button>
+    <button class="mobile-nav-btn" data-tab="tab-config"><i class="fas fa-gear"></i><span>Definições</span></button>
   </div>
 </nav>
 
+<!-- ==========================================================================
+     VANILLA JAVASCRIPT APP ENGINE
+     ========================================================================== -->
 <script>
   (function() {
-    window.app = {};
+    // 1. PALETAS FIXAS DE OPÇÕES
+    const ICON_LIST = [
+      'heartbeat', 'coins', 'bullseye', 'book', 'briefcase', 'dumbbell', 
+      'brain', 'code', 'music', 'leaf', 'utensils', 'bed', 
+      'running', 'paint-brush', 'language', 'graduation-cap', 'wallet', 'lightbulb', 
+      'users', 'fire', 'star', 'gem', 'rocket', 'seedling'
+    ];
 
+    const COLOR_LIST = [
+      '#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#10b981', 
+      '#ec4899', '#06b6d4', '#84cc16', '#6366f1', '#64748b'
+    ];
+
+    const ACCENT_COLORS = [
+      { name: 'Azul', primary: '#5f8ee4', dark: '#2d5a9c', darker: '#1e3a66' },
+      { name: 'Verde', primary: '#10b981', dark: '#047857', darker: '#064e3b' },
+      { name: 'Roxo', primary: '#8b5cf6', dark: '#6d28d9', darker: '#4c1d95' },
+      { name: 'Rosa', primary: '#ec4899', dark: '#be185d', darker: '#831843' },
+      { name: 'Laranja', primary: '#f97316', dark: '#c2410c', darker: '#7c2d12' },
+      { name: 'Ciano', primary: '#06b6d4', dark: '#0e7490', darker: '#164e63' }
+    ];
+
+    // 2. ESTADO DEFAULT (PRIMEIRO USO)
     const defaultState = {
       attributes: [
         { id: 'attr-1', name: 'Saúde', icon: 'heartbeat', color: '#ef4444' },
@@ -710,18 +1156,18 @@
         { id: 'attr-5', name: 'Carreira', icon: 'briefcase', color: '#10b981' }
       ],
       tasks: [
-        { id: 't-1', title: 'Beber 2L de Água', attrId: 'attr-1', difficulty: 'easy', type: 'positive', recurrence: 'daily', completed: false, xp: 10, gold: 5, lastCompletedAt: null, createdAt: Date.now() },
-        { id: 't-2', title: 'Fumar / Comer Fast-Food', attrId: 'attr-1', difficulty: 'medium', type: 'negative', recurrence: 'daily', completed: false, xp: 0, gold: 12, hpPenalty: 20, lastCompletedAt: null, createdAt: Date.now() },
-        { id: 't-3', title: 'Ler 15 Páginas de Livro', attrId: 'attr-4', difficulty: 'medium', type: 'positive', recurrence: 'daily', completed: false, xp: 25, gold: 12, lastCompletedAt: null, createdAt: Date.now() }
+        { id: 't-1', title: 'Beber 2L de Água', attrId: 'attr-1', difficulty: 'easy', type: 'positive', recurrence: 'daily', customDays: [], completed: false, xp: 10, gold: 5, lastCompletedAt: null, createdAt: Date.now() },
+        { id: 't-2', title: 'Procrastinar / Redes Sociais', attrId: 'attr-3', difficulty: 'medium', type: 'negative', recurrence: 'daily', customDays: [], completed: false, xp: 0, gold: 12, hpPenalty: 20, lastCompletedAt: null, createdAt: Date.now() },
+        { id: 't-3', title: 'Ler 15 Páginas de Livro', attrId: 'attr-4', difficulty: 'medium', type: 'positive', recurrence: 'daily', customDays: [], completed: false, xp: 25, gold: 12, lastCompletedAt: null, createdAt: Date.now() }
       ],
       rewards: [
-        { id: 'r-hp-potion', name: 'Porção de Cura (Recupera 50 HP)', price: 40, isHpPotion: true },
-        { id: 'r-1', name: '1 Horinha de Jogos / Videogame', price: 50 },
-        { id: 'r-2', name: 'Pedir Delivery ou Lanche Especial', price: 150 }
+        { id: 'r-hp-potion', name: 'Recarga de Energia (+50 Bateria)', price: 40, isHpPotion: true, limit: 0, cycle: 'none', usedCount: 0, lastResetAt: Date.now() },
+        { id: 'r-1', name: '1h de Jogos / Entretenimento', price: 50, isHpPotion: false, limit: 1, cycle: 'weekly', usedCount: 0, lastResetAt: Date.now() }
       ],
       logs: [
-        { id: 'l-1', type: 'system', message: 'Sistema de Gamificação com Streaks e Hábitos Negativos carregado com sucesso.', timestamp: Date.now() }
+        { id: 'l-1', type: 'system', message: 'Sistema de Gamificação V4 inicializado com sucesso.', timestamp: Date.now() }
       ],
+      completionHistory: [], // Histórico individual para estatísticas fiáveis
       gold: 100,
       totalXP: 0,
       completedCount: 0,
@@ -730,52 +1176,95 @@
       streak: 0,
       lastStreakDate: null,
       comebackBoostUntil: null,
+      autoBackupCounter: 0,
       config: {
+        theme: 'dark',
+        accentIndex: 0,
         difficulties: {
           easy: { xp: 10, gold: 5, hp: 10 },
           medium: { xp: 25, gold: 12, hp: 20 },
           hard: { xp: 50, gold: 25, hp: 35 },
           epic: { xp: 100, gold: 60, hp: 50 }
+        },
+        charts: {
+          xp: { visible: true, type: 'bar' },
+          completion: { visible: true, type: 'doughnut' },
+          evolution: { visible: true, type: 'line' },
+          focus: { visible: true, type: 'polarArea' }
         }
       }
     };
 
     let state = loadState();
 
+    // 3. PERSISTÊNCIA & BACKUP
     function loadState() {
       try {
         const saved = localStorage.getItem('gamification_state_v4');
         if (saved) return JSON.parse(saved);
-      } catch(e) { console.error('Erro ao carregar estado:', e); }
+      } catch(e) { console.error('Erro ao carregar estado v4:', e); }
       return JSON.parse(JSON.stringify(defaultState));
     }
 
     function saveState() {
+      state.autoBackupCounter = (state.autoBackupCounter || 0) + 1;
+      if (state.autoBackupCounter >= 10) {
+        state.autoBackupCounter = 0;
+        localStorage.setItem('gamification_backup', JSON.stringify({
+          timestamp: Date.now(),
+          data: state
+        }));
+      }
       localStorage.setItem('gamification_state_v4', JSON.stringify(state));
     }
 
     function addLog(type, message) {
-      state.logs.unshift({ id: 'l-' + Date.now(), type, message, timestamp: Date.now() });
+      state.logs.unshift({
+        id: 'l-' + Date.now(),
+        type,
+        message,
+        timestamp: Date.now()
+      });
       if (state.logs.length > 200) state.logs.pop();
     }
 
-    // ======================= CHECAGENS & RESETS =======================
+    // 4. SEGURANÇA DOM (ESCAPE HTML)
+    function escapeHTML(str) {
+      return String(str).replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+
+    // 5. CÁLCULO DE NÍVEL
+    function getLevelInfo(totalXP) {
+      let level = 1;
+      let xpNeeded = 100;
+      let currentLevelXP = totalXP || 0;
+
+      while (currentLevelXP >= xpNeeded) {
+        currentLevelXP -= xpNeeded;
+        level++;
+        xpNeeded = Math.floor(xpNeeded * 1.2);
+      }
+
+      return { level, currentXP: currentLevelXP, neededXP: xpNeeded };
+    }
+
+    // 6. CHECAGEM DE RESETS & CICLOS
     function checkRecurrenceAndResets() {
       const now = new Date();
       let changed = false;
 
-      if (state.hp === undefined) state.hp = 100;
-      if (state.maxHp === undefined) state.maxHp = 100;
-      if (state.streak === undefined) state.streak = 0;
-
-      // Check Streak
+      // Reset de Streaks com verificação rigorosa de data
       if (state.lastStreakDate) {
         const lastStr = new Date(state.lastStreakDate);
-        const diffDays = Math.floor((now.setHours(0,0,0,0) - lastStr.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
-        
+        const todayZero = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const lastZero = new Date(lastStr.getFullYear(), lastStr.getMonth(), lastStr.getDate());
+        const diffDays = Math.round((todayZero - lastZero) / (1000 * 60 * 60 * 24));
+
         if (diffDays > 1) {
           if (state.streak > 0) {
-            addLog('system', `🔥 Streak de ${state.streak} dias foi quebrado! Ativado Desafio de Recuperação (2x XP durante 7 dias).`);
+            addLog('system', `🔥 A sequência de ${state.streak} dias foi interrompida. Bónus de Recuperação ativado!`);
             state.comebackBoostUntil = Date.now() + (7 * 24 * 60 * 60 * 1000);
           }
           state.streak = 0;
@@ -794,12 +1283,39 @@
         } else if (task.recurrence === 'weekly') {
           const diffDays = (now - lastDate) / (1000 * 60 * 60 * 24);
           if (diffDays >= 7) reset = true;
+        } else if (task.recurrence === 'custom' && Array.isArray(task.customDays)) {
+          if (now.toDateString() !== lastDate.toDateString()) {
+            const currentDayNum = now.getDay();
+            if (task.customDays.includes(currentDayNum)) reset = true;
+          }
         }
 
         if (reset) {
           task.completed = false;
           changed = true;
-          addLog('system', `Tarefa recorrente reiniciada: "${task.title}"`);
+          addLog('system', `Tarefa recorrente disponível novamente: "${task.title}"`);
+        }
+      });
+
+      // Reset de Stock de Recompensas por Ciclo
+      state.rewards.forEach(r => {
+        if (r.cycle === 'none' || !r.lastResetAt) return;
+        const last = new Date(r.lastResetAt);
+        let resetStock = false;
+
+        if (r.cycle === 'daily') {
+          if (now.toDateString() !== last.toDateString()) resetStock = true;
+        } else if (r.cycle === 'weekly') {
+          const diffDays = (now - last) / (1000 * 60 * 60 * 24);
+          if (diffDays >= 7 || (now.getDay() === 1 && last.getDay() !== 1)) resetStock = true;
+        } else if (r.cycle === 'monthly') {
+          if (now.getMonth() !== last.getMonth() || now.getFullYear() !== last.getFullYear()) resetStock = true;
+        }
+
+        if (resetStock) {
+          r.usedCount = 0;
+          r.lastResetAt = Date.now();
+          changed = true;
         }
       });
 
@@ -809,7 +1325,23 @@
       }
     }
 
-    // ======================= TABS =======================
+    // 7. APLICAÇÃO DE TEMAS E ACCENTS
+    function applyThemeAndAccent() {
+      const config = state.config || defaultState.config;
+      document.documentElement.setAttribute('data-theme', config.theme || 'dark');
+
+      const accent = ACCENT_COLORS[config.accentIndex || 0];
+      if (accent) {
+        document.documentElement.style.setProperty('--accent', accent.primary);
+        document.documentElement.style.setProperty('--accent-dark', accent.dark);
+        document.documentElement.style.setProperty('--accent-darker', accent.darker);
+        
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme) metaTheme.setAttribute('content', accent.primary);
+      }
+    }
+
+    // 8. TABS NAVEGAÇÃO
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       const target = document.getElementById(tabId);
@@ -820,70 +1352,131 @@
       });
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      if (tabId === 'tab-overview') setTimeout(initCharts, 80);
+      if (tabId === 'tab-overview') setTimeout(initCharts, 100);
     }
 
     document.querySelectorAll('.tab-btn, .mobile-nav-btn').forEach(btn => {
       btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 
-    // ======================= RENDERS =======================
+    // 9. RENDERS DA INTERFACE
     function renderTopStats() {
+      applyThemeAndAccent();
+
+      const lvlInfo = getLevelInfo(state.totalXP);
+      document.getElementById('topLevel').textContent = lvlInfo.level;
+      document.getElementById('lblLevel').textContent = lvlInfo.level;
+      document.getElementById('lblLevelProgress').textContent = `${lvlInfo.currentXP} / ${lvlInfo.neededXP} XP`;
+      document.getElementById('levelProgressBar').style.width = `${Math.min(100, (lvlInfo.currentXP / lvlInfo.neededXP) * 100)}%`;
+
+      document.getElementById('topHP').textContent = state.hp !== undefined ? state.hp : 100;
+      document.getElementById('topStreak').textContent = state.streak || 0;
       document.getElementById('topXP').textContent = state.totalXP || 0;
       document.getElementById('topGold').textContent = state.gold || 0;
-      document.getElementById('topCompleted').textContent = state.completedCount || 0;
-      document.getElementById('topHP').textContent = state.hp !== undefined ? state.hp : 100;
-      document.getElementById('topMaxHP').textContent = state.maxHp || 100;
-      document.getElementById('topStreak').textContent = state.streak || 0;
 
+      document.getElementById('dashStreak').textContent = state.streak || 0;
       document.getElementById('dashXP').textContent = state.totalXP || 0;
       document.getElementById('dashGold').textContent = state.gold || 0;
-      document.getElementById('dashCompleted').textContent = state.completedCount || 0;
-      document.getElementById('dashStreak').textContent = state.streak || 0;
-      document.getElementById('dashActive').textContent = state.tasks.filter(t => !t.completed && t.type !== 'negative').length;
-      document.getElementById('shopGold').textContent = state.gold || 0;
+
+      // Tarefas concluídas hoje
+      const todayStr = new Date().toDateString();
+      const doneToday = (state.completionHistory || []).filter(h => new Date(h.timestamp).toDateString() === todayStr).length;
+      document.getElementById('dashDoneToday').textContent = doneToday;
+
+      document.getElementById('dashActiveTasks').textContent = state.tasks.filter(t => !t.completed && t.type !== 'negative').length;
 
       const banner = document.getElementById('comebackBanner');
-      if (state.comebackBoostUntil && Date.now() < state.comebackBoostUntil) {
-        banner.style.display = 'block';
-      } else {
-        banner.style.display = 'none';
+      banner.style.display = (state.comebackBoostUntil && Date.now() < state.comebackBoostUntil) ? 'block' : 'none';
+    }
+
+    function renderTodayTasks() {
+      const container = document.getElementById('todayTasksList');
+      container.innerHTML = '';
+
+      const pendingToday = state.tasks.filter(t => !t.completed);
+
+      if (pendingToday.length === 0) {
+        container.innerHTML = '<div class="empty-state">🎉 Excelente! Não tens tarefas pendentes para hoje.</div>';
+        return;
       }
+
+      pendingToday.forEach(task => {
+        const attr = state.attributes.find(a => a.id === task.attrId) || { name: 'Geral', icon: 'star', color: '#5f8ee4' };
+        const isNegative = task.type === 'negative';
+        
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.innerHTML = `
+          <div class="item-main">
+            <div class="item-icon-badge" style="background-color:${isNegative ? 'var(--hp)' : attr.color}">
+              <i class="fas fa-${isNegative ? 'exclamation-triangle' : (attr.icon || 'star')}"></i>
+            </div>
+            <div class="item-details">
+              <span class="item-title">${escapeHTML(task.title)}</span>
+              <div class="item-tags">
+                <span class="tag-chip" style="color:${attr.color}; border-color:${attr.color}55"><i class="fas fa-tag"></i> ${escapeHTML(attr.name)}</span>
+                ${isNegative ? 
+                  `<span class="tag-chip" style="color:var(--hp);"><i class="fas fa-heart-crack"></i> -${task.hpPenalty || 20}% Bateria</span>` :
+                  `<span class="tag-chip xp">+${task.xp} XP</span><span class="tag-chip gold">+${task.gold} Créditos</span>`
+                }
+              </div>
+            </div>
+          </div>
+          <div class="item-actions">
+            ${isNegative ? 
+              `<button class="small danger" data-action="negative" data-id="${task.id}"><i class="fas fa-bolt"></i> Deslize</button>` :
+              `<button class="small primary" data-action="complete" data-id="${task.id}"><i class="fas fa-check"></i> Concluir</button>`
+            }
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      // Binds seguros de eventos
+      container.querySelectorAll('button[data-action="complete"]').forEach(b => {
+        b.onclick = () => completeTask(b.dataset.id);
+      });
+      container.querySelectorAll('button[data-action="negative"]').forEach(b => {
+        b.onclick = () => triggerNegativeHabit(b.dataset.id);
+      });
     }
 
     function renderTasks() {
+      renderTodayTasks();
+
       const list = document.getElementById('tasksList');
-      const filterAttrSelect = document.getElementById('taskFilterAttr');
+      const filterSelect = document.getElementById('taskFilterAttr');
       const searchInput = document.getElementById('taskSearchInput');
 
-      const currentFilter = filterAttrSelect.value;
-      filterAttrSelect.innerHTML = '<option value="all">Todos os Atributos</option>';
+      // Popula selects de atributos
+      const currentFilter = filterSelect.value;
+      filterSelect.innerHTML = '<option value="all">Todos os Pilares</option>';
       state.attributes.forEach(a => {
         const opt = document.createElement('option');
         opt.value = a.id;
         opt.textContent = a.name;
-        filterAttrSelect.appendChild(opt);
+        filterSelect.appendChild(opt);
       });
-      filterAttrSelect.value = currentFilter || 'all';
+      filterSelect.value = currentFilter || 'all';
 
-      const taskAttrInp = document.getElementById('taskAttr');
-      taskAttrInp.innerHTML = '';
+      const taskAttrSelect = document.getElementById('taskAttr');
+      taskAttrSelect.innerHTML = '';
       state.attributes.forEach(a => {
         const opt = document.createElement('option');
         opt.value = a.id;
         opt.textContent = a.name;
-        taskAttrInp.appendChild(opt);
+        taskAttrSelect.appendChild(opt);
       });
 
       list.innerHTML = '';
 
       if (state.tasks.length === 0) {
-        list.innerHTML = '<div class="empty-state">Nenhuma tarefa cadastrada. Adicione uma acima!</div>';
+        list.innerHTML = '<div class="empty-state">Nenhuma tarefa registada. Cria a tua primeira missão acima!</div>';
         return;
       }
 
       const query = (searchInput.value || '').toLowerCase();
-      const selectedAttr = filterAttrSelect.value;
+      const selectedAttr = filterSelect.value;
 
       let filtered = state.tasks.filter(t => {
         const matchesQuery = t.title.toLowerCase().includes(query);
@@ -892,7 +1485,7 @@
       });
 
       if (filtered.length === 0) {
-        list.innerHTML = '<div class="empty-state">Nenhuma tarefa corresponde à pesquisa.</div>';
+        list.innerHTML = '<div class="empty-state">Nenhuma tarefa encontrada.</div>';
         return;
       }
 
@@ -901,42 +1494,50 @@
       sorted.forEach(task => {
         const attr = state.attributes.find(a => a.id === task.attrId) || { name: 'Geral', icon: 'star', color: '#5f8ee4' };
         const isNegative = task.type === 'negative';
+        
+        let recLabel = 'Única';
+        if (task.recurrence === 'daily') recLabel = 'Diária';
+        if (task.recurrence === 'weekly') recLabel = 'Semanal';
+        if (task.recurrence === 'custom') recLabel = 'Personalizada';
+
         const card = document.createElement('div');
-        card.className = 'item-card';
-
-        let recLabel = task.recurrence === 'daily' ? 'Diária' : task.recurrence === 'weekly' ? 'Semanal' : 'Única';
-
+        card.className = `item-card ${task.completed ? 'completed' : ''}`;
         card.innerHTML = `
           <div class="item-main">
-            <div class="item-icon-badge" style="background-color: ${isNegative ? 'var(--hp)' : attr.color}">
+            <div class="item-icon-badge" style="background-color:${isNegative ? 'var(--hp)' : attr.color}">
               <i class="fas fa-${isNegative ? 'exclamation-triangle' : (attr.icon || 'star')}"></i>
             </div>
             <div class="item-details">
-              <span class="item-title" style="${task.completed ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${task.title}</span>
+              <span class="item-title">${escapeHTML(task.title)}</span>
               <div class="item-tags">
-                <span class="tag-chip" style="color:${attr.color}; border-color:${attr.color}55"><i class="fas fa-tag"></i> ${attr.name}</span>
+                <span class="tag-chip" style="color:${attr.color}; border-color:${attr.color}55"><i class="fas fa-tag"></i> ${escapeHTML(attr.name)}</span>
                 ${isNegative ? 
-                  `<span class="tag-chip" style="color:var(--hp); border-color:rgba(239,68,68,0.3);"><i class="fas fa-heart-crack"></i> -${task.hpPenalty || 20} HP</span>
-                   <span class="tag-chip" style="color:var(--hp);"><i class="fas fa-minus-circle"></i> -${task.gold} Gold</span>` : 
-                  `<span class="tag-chip xp">+${task.xp} XP</span>
-                   <span class="tag-chip gold">+${task.gold} Gold</span>`
+                  `<span class="tag-chip" style="color:var(--hp);"><i class="fas fa-heart-crack"></i> -${task.hpPenalty || 20}% Bateria</span>` :
+                  `<span class="tag-chip xp">+${task.xp} XP</span><span class="tag-chip gold">+${task.gold} Créditos</span>`
                 }
-                <span class="tag-chip"><i class="fas fa-arrows-rotate"></i> ${recLabel}</span>
+                <span class="tag-chip"><i class="fas fa-rotate"></i> ${recLabel}</span>
               </div>
             </div>
           </div>
           <div class="item-actions">
             ${isNegative ? 
-              `<button class="small danger" onclick="window.app.triggerNegativeHabit('${task.id}')"><i class="fas fa-bolt"></i> Registrar Deslize</button>` :
+              `<button class="small danger" data-action="negative" data-id="${task.id}"><i class="fas fa-bolt"></i> Deslize</button>` :
               (!task.completed ? 
-                `<button class="small primary" onclick="window.app.completeTask('${task.id}')"><i class="fas fa-check"></i> Concluir</button>` : 
-                `<span class="tag-chip" style="color:var(--xp); font-size:0.8rem;"><i class="fas fa-check-double"></i> Feito</span>`)
+                `<button class="small primary" data-action="complete" data-id="${task.id}"><i class="fas fa-check"></i> Concluir</button>` :
+                `<span class="tag-chip" style="color:var(--xp); font-size:0.8rem;"><i class="fas fa-check-double"></i> Concluída</span>`)
             }
-            <button class="small danger" onclick="window.app.deleteTask('${task.id}')" aria-label="Excluir"><i class="fas fa-trash"></i></button>
+            <button class="small" data-action="edit" data-id="${task.id}"><i class="fas fa-pen"></i></button>
+            <button class="small danger" data-action="delete" data-id="${task.id}"><i class="fas fa-trash"></i></button>
           </div>
         `;
         list.appendChild(card);
       });
+
+      // Bindings
+      list.querySelectorAll('button[data-action="complete"]').forEach(b => b.onclick = () => completeTask(b.dataset.id));
+      list.querySelectorAll('button[data-action="negative"]').forEach(b => b.onclick = () => triggerNegativeHabit(b.dataset.id));
+      list.querySelectorAll('button[data-action="edit"]').forEach(b => b.onclick = () => editTask(b.dataset.id));
+      list.querySelectorAll('button[data-action="delete"]').forEach(b => b.onclick = () => deleteTask(b.dataset.id));
     }
 
     function renderAttributes() {
@@ -944,7 +1545,7 @@
       list.innerHTML = '';
 
       if (state.attributes.length === 0) {
-        list.innerHTML = '<div class="empty-state">Nenhum atributo criado.</div>';
+        list.innerHTML = '<div class="empty-state">Nenhum pilar registado.</div>';
         return;
       }
 
@@ -957,14 +1558,18 @@
               <i class="fas fa-${attr.icon || 'star'}"></i>
             </div>
             <div class="item-details">
-              <span class="item-title">${attr.name}</span>
+              <span class="item-title">${escapeHTML(attr.name)}</span>
             </div>
           </div>
           <div class="item-actions">
-            <button class="small danger" onclick="window.app.deleteAttribute('${attr.id}')"><i class="fas fa-trash"></i></button>
+            <button class="small danger" data-action="delete-attr" data-id="${attr.id}"><i class="fas fa-trash"></i></button>
           </div>
         `;
         list.appendChild(card);
+      });
+
+      list.querySelectorAll('button[data-action="delete-attr"]').forEach(b => {
+        b.onclick = () => deleteAttribute(b.dataset.id);
       });
     }
 
@@ -980,180 +1585,275 @@
       state.rewards.forEach(r => {
         const card = document.createElement('div');
         card.className = 'item-card';
-        const disabled = state.gold < r.price;
+
+        const isStockOut = r.limit > 0 && (r.usedCount || 0) >= r.limit;
+        const disabled = state.gold < r.price || isStockOut;
+
+        let cycleLabel = 'Ilimitado';
+        if (r.cycle === 'daily') cycleLabel = 'Diário';
+        if (r.cycle === 'weekly') cycleLabel = 'Semanal';
+        if (r.cycle === 'monthly') cycleLabel = 'Mensal';
 
         card.innerHTML = `
           <div class="item-main">
-            <div class="item-icon-badge" style="background-color: ${r.isHpPotion ? 'var(--hp)' : 'var(--gold)'}">
+            <div class="item-icon-badge" style="background-color:${r.isHpPotion ? 'var(--hp)' : 'var(--gold)'}">
               <i class="fas fa-${r.isHpPotion ? 'kit-medical' : 'gift'}"></i>
             </div>
             <div class="item-details">
-              <span class="item-title">${r.name}</span>
+              <span class="item-title">${escapeHTML(r.name)}</span>
               <div class="item-tags">
-                <span class="tag-chip gold"><i class="fas fa-coins"></i> ${r.price} Gold</span>
+                <span class="tag-chip gold"><i class="fas fa-coins"></i> ${r.price} Créditos</span>
+                ${r.limit > 0 ? `<span class="tag-chip"><i class="fas fa-box"></i> Stock: ${r.limit - (r.usedCount || 0)}/${r.limit} (${cycleLabel})</span>` : ''}
               </div>
             </div>
           </div>
           <div class="item-actions">
-            <button class="small primary" onclick="window.app.redeemReward('${r.id}')" ${disabled ? 'disabled' : ''}>
-              <i class="fas fa-exchange-alt"></i> Resgatar
+            <button class="small primary" data-action="redeem" data-id="${r.id}" ${disabled ? 'disabled' : ''}>
+              ${isStockOut ? 'Esgotado' : '<i class="fas fa-exchange-alt"></i> Resgatar'}
             </button>
-            <button class="small danger" onclick="window.app.deleteReward('${r.id}')"><i class="fas fa-trash"></i></button>
+            <button class="small danger" data-action="delete-reward" data-id="${r.id}"><i class="fas fa-trash"></i></button>
           </div>
         `;
         list.appendChild(card);
       });
+
+      list.querySelectorAll('button[data-action="redeem"]').forEach(b => b.onclick = () => redeemReward(b.dataset.id));
+      list.querySelectorAll('button[data-action="delete-reward"]').forEach(b => b.onclick = () => deleteReward(b.dataset.id));
     }
 
     function renderLogs() {
-      const list = document.getElementById('logsList');
-      list.innerHTML = '';
+      const container = document.getElementById('logsList');
+      container.innerHTML = '';
 
-      if (state.logs.length === 0) {
-        list.innerHTML = '<div class="empty-state">Nenhum registro.</div>';
+      const activeFilter = document.querySelector('.chip-btn.active')?.dataset.filter || 'all';
+
+      let filtered = state.logs || [];
+      if (activeFilter !== 'all') {
+        if (activeFilter === 'create') filtered = filtered.filter(l => l.type.includes('create'));
+        else if (activeFilter === 'delete') filtered = filtered.filter(l => l.type.includes('delete'));
+        else filtered = filtered.filter(l => l.type === activeFilter);
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-state">Nenhum registo encontrado.</div>';
         return;
       }
 
-      state.logs.slice(0, 60).forEach(l => {
+      filtered.forEach(log => {
         const item = document.createElement('div');
-        item.className = 'history-log';
-        const date = new Date(l.timestamp).toLocaleString('pt-BR');
-        item.innerHTML = `<span>${date}</span> ${l.message}`;
-        list.appendChild(item);
+        item.className = 'log-item';
+        const d = new Date(log.timestamp).toLocaleString('pt-PT');
+        item.innerHTML = `<span class="log-date">${d}</span><span>${escapeHTML(log.message)}</span>`;
+        container.appendChild(item);
       });
     }
 
-    // ======================= GRÁFICOS =======================
+    function renderConfig() {
+      const cfg = state.config;
+
+      // Theme toggle buttons
+      document.getElementById('btnThemeDark').className = cfg.theme === 'dark' ? 'primary' : '';
+      document.getElementById('btnThemeLight').className = cfg.theme === 'light' ? 'primary' : '';
+
+      // Dificuldades
+      const diffs = cfg.difficulties;
+      document.getElementById('diff_easy_xp').value = diffs.easy.xp;
+      document.getElementById('diff_easy_gold').value = diffs.easy.gold;
+      document.getElementById('diff_medium_xp').value = diffs.medium.xp;
+      document.getElementById('diff_medium_gold').value = diffs.medium.gold;
+      document.getElementById('diff_hard_xp').value = diffs.hard.xp;
+      document.getElementById('diff_hard_gold').value = diffs.hard.gold;
+      document.getElementById('diff_epic_xp').value = diffs.epic.xp;
+      document.getElementById('diff_epic_gold').value = diffs.epic.gold;
+
+      // Gráficos
+      document.getElementById('cfg_chart_xp_visible').checked = cfg.charts.xp.visible;
+      document.getElementById('cfg_chart_xp_type').value = cfg.charts.xp.type;
+      document.getElementById('cfg_chart_completion_visible').checked = cfg.charts.completion.visible;
+      document.getElementById('cfg_chart_completion_type').value = cfg.charts.completion.type;
+      document.getElementById('cfg_chart_evolution_visible').checked = cfg.charts.evolution.visible;
+      document.getElementById('cfg_chart_evolution_type').value = cfg.charts.evolution.type;
+      document.getElementById('cfg_chart_focus_visible').checked = cfg.charts.focus.visible;
+      document.getElementById('cfg_chart_focus_type').value = cfg.charts.focus.type;
+
+      // Backup Section
+      const backupContainer = document.getElementById('backupRestoreSection');
+      backupContainer.innerHTML = '';
+      try {
+        const rawBkp = localStorage.getItem('gamification_backup');
+        if (rawBkp) {
+          const bkp = JSON.parse(rawBkp);
+          const bkpDate = new Date(bkp.timestamp).toLocaleString('pt-PT');
+          backupContainer.innerHTML = `
+            <div class="stat-item" style="text-align:left; background:var(--card-inner);">
+              <p style="font-size:0.85rem; color:var(--text-mid);">Cópia de Segurança Automática Encontrada (${bkpDate})</p>
+              <button class="primary small" id="btnRestoreBkp" style="margin-top:8px;"><i class="fas fa-rotate-left"></i> Restaurar esta Cópia</button>
+            </div>
+          `;
+          document.getElementById('btnRestoreBkp').onclick = restoreBackup;
+        }
+      } catch(e) {}
+    }
+
+    // 10. GRÁFICOS (CHART.JS FIÁVEIS)
     let chartInstances = {};
 
     function initCharts() {
       ['xpByAttrChart', 'completionChart', 'evolutionChart', 'focusDistChart'].forEach(id => {
-        if (chartInstances[id]) chartInstances[id].destroy();
+        if (chartInstances[id]) {
+          chartInstances[id].destroy();
+          delete chartInstances[id];
+        }
       });
 
-      const attrNames = state.attributes.map(a => a.name);
-      const attrXP = state.attributes.map(attr => {
-        return state.tasks
-          .filter(t => t.attrId === attr.id && t.completed)
-          .reduce((sum, t) => sum + t.xp, 0);
-      });
+      const cfgs = state.config.charts;
+      let anyVisible = false;
 
-      // Chart 1: XP por Atributo
-      const ctx1 = document.getElementById('xpByAttrChart').getContext('2d');
-      chartInstances.xpByAttrChart = new Chart(ctx1, {
-        type: 'bar',
-        data: {
-          labels: attrNames.length ? attrNames : ['—'],
-          datasets: [{
-            label: 'XP Acumulado',
-            data: attrXP.length ? attrXP : [0],
-            backgroundColor: state.attributes.map(a => a.color || '#5f8ee4'),
-            borderRadius: 6,
-            spacing: 0
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            title: { display: true, text: 'XP por Atributo', color: '#b0c8e0' }
+      // Toggle Containers
+      document.getElementById('container-chart-xp').style.display = cfgs.xp.visible ? 'block' : 'none';
+      document.getElementById('container-chart-completion').style.display = cfgs.completion.visible ? 'block' : 'none';
+      document.getElementById('container-chart-evolution').style.display = cfgs.evolution.visible ? 'block' : 'none';
+      document.getElementById('container-chart-focus').style.display = cfgs.focus.visible ? 'block' : 'none';
+
+      if (cfgs.xp.visible || cfgs.completion.visible || cfgs.evolution.visible || cfgs.focus.visible) {
+        document.getElementById('noChartsMsg').style.display = 'none';
+      } else {
+        document.getElementById('noChartsMsg').style.display = 'block';
+        return;
+      }
+
+      const isLight = state.config.theme === 'light';
+      const textColor = isLight ? '#334155' : '#b0c8e0';
+      const gridColor = isLight ? '#e2e8f0' : '#1e273a';
+
+      // 1. Chart XP por Atributo (FIÁVEL - Calculado do Histórico)
+      if (cfgs.xp.visible) {
+        const attrXPMap = {};
+        state.attributes.forEach(a => attrXPMap[a.id] = 0);
+
+        (state.completionHistory || []).forEach(h => {
+          if (attrXPMap[h.attrId] !== undefined) attrXPMap[h.attrId] += h.xp;
+        });
+
+        const labels = state.attributes.map(a => a.name);
+        const data = state.attributes.map(a => attrXPMap[a.id]);
+
+        const ctx = document.getElementById('xpByAttrChart').getContext('2d');
+        chartInstances['xpByAttrChart'] = new Chart(ctx, {
+          type: cfgs.xp.type,
+          data: {
+            labels,
+            datasets: [{
+              label: 'XP Acumulado',
+              data,
+              backgroundColor: state.attributes.map(a => a.color),
+              borderRadius: 6,
+              spacing: 0
+            }]
           },
-          scales: {
-            y: { beginAtZero: true, grid: { color: '#1e273a' }, ticks: { color: '#7a8ea8' } },
-            x: { ticks: { color: '#7a8ea8' } }
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, title: { display: true, text: 'XP Acumulado por Pilar', color: textColor } },
+            scales: ['bar','line'].includes(cfgs.xp.type) ? { y: { grid: { color: gridColor }, ticks: { color: textColor } }, x: { ticks: { color: textColor } } } : {}
           }
-        }
-      });
+        });
+      }
 
-      // Chart 2: Taxa de Conclusão
-      const completedCount = state.tasks.filter(t => t.completed).length;
-      const pendingCount = state.tasks.filter(t => !t.completed && t.type !== 'negative').length;
+      // 2. Taxa de Conclusão (Ativas vs Concluídas)
+      if (cfgs.completion.visible) {
+        const done = state.tasks.filter(t => t.completed).length;
+        const pending = state.tasks.filter(t => !t.completed && t.type !== 'negative').length;
 
-      const ctx2 = document.getElementById('completionChart').getContext('2d');
-      chartInstances.completionChart = new Chart(ctx2, {
-        type: 'doughnut',
-        data: {
-          labels: ['Concluídas', 'Pendentes'],
-          datasets: [{
-            data: [completedCount, pendingCount],
-            backgroundColor: ['#4cd964', '#2a3448'],
-            borderWidth: 0,
-            spacing: 0
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'bottom', labels: { color: '#b0c8e0' } },
-            title: { display: true, text: 'Conclusão de Tarefas', color: '#b0c8e0' }
-          }
-        }
-      });
-
-      // Chart 3: Evolução Semanal
-      const ctx3 = document.getElementById('evolutionChart').getContext('2d');
-      chartInstances.evolutionChart = new Chart(ctx3, {
-        type: 'line',
-        data: {
-          labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
-          datasets: [{
-            label: 'XP Diário',
-            data: [15, 30, 45, 30, 60, 80, 100],
-            borderColor: '#4cd964',
-            backgroundColor: 'rgba(76, 217, 100, 0.1)',
-            fill: true,
-            tension: 0.3,
-            spacing: 0
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            title: { display: true, text: 'Evolução de XP (Semana)', color: '#b0c8e0' }
+        const ctx = document.getElementById('completionChart').getContext('2d');
+        chartInstances['completionChart'] = new Chart(ctx, {
+          type: cfgs.completion.type,
+          data: {
+            labels: ['Concluídas', 'Pendentes'],
+            datasets: [{
+              data: [done, pending],
+              backgroundColor: ['#4cd964', gridColor],
+              borderWidth: 0,
+              spacing: 0
+            }]
           },
-          scales: {
-            y: { beginAtZero: true, grid: { color: '#1e273a' }, ticks: { color: '#7a8ea8' } },
-            x: { ticks: { color: '#7a8ea8' } }
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { color: textColor } }, title: { display: true, text: 'Conclusão de Tarefas Atuais', color: textColor } }
           }
+        });
+      }
+
+      // 3. Evolução Diária (FIÁVEL - Últimos 7 dias do Histórico Real)
+      if (cfgs.evolution.visible) {
+        const days = [];
+        const dayXP = [0, 0, 0, 0, 0, 0, 0];
+
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date();
+          d.setDate(d.getDate() - i);
+          days.push(d.toLocaleDateString('pt-PT', { weekday: 'short' }));
+
+          const dStr = d.toDateString();
+          (state.completionHistory || []).forEach(h => {
+            if (new Date(h.timestamp).toDateString() === dStr) {
+              dayXP[6 - i] += h.xp;
+            }
+          });
         }
-      });
 
-      // Chart 4: Distribuição de Foco
-      const focusData = state.attributes.map(attr => {
-        return state.tasks.filter(t => t.attrId === attr.id).length || 1;
-      });
-
-      const ctx4 = document.getElementById('focusDistChart').getContext('2d');
-      chartInstances.focusDistChart = new Chart(ctx4, {
-        type: 'polarArea',
-        data: {
-          labels: attrNames.length ? attrNames : ['—'],
-          datasets: [{
-            data: focusData,
-            backgroundColor: ['#5f8ee4', '#4cd964', '#f5c542', '#ef4444', '#8b5cf6'],
-            spacing: 0
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'bottom', labels: { color: '#b0c8e0' } },
-            title: { display: true, text: 'Distribuição de Tarefas', color: '#b0c8e0' }
+        const ctx = document.getElementById('evolutionChart').getContext('2d');
+        chartInstances['evolutionChart'] = new Chart(ctx, {
+          type: cfgs.evolution.type,
+          data: {
+            labels: days,
+            datasets: [{
+              label: 'XP Diário',
+              data: dayXP,
+              borderColor: '#4cd964',
+              backgroundColor: 'rgba(76, 217, 100, 0.15)',
+              fill: true,
+              tension: 0.3,
+              spacing: 0
+            }]
           },
-          scales: {
-            r: { grid: { color: '#1e273a' }, ticks: { backdropColor: 'transparent', color: '#7a8ea8' } }
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, title: { display: true, text: 'Evolução do Foco (Últimos 7 Dias)', color: textColor } },
+            scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } }, x: { ticks: { color: textColor } } }
           }
-        }
-      });
+        });
+      }
+
+      // 4. Distribuição de Tarefas por Pilar
+      if (cfgs.focus.visible) {
+        const labels = state.attributes.map(a => a.name);
+        const data = state.attributes.map(a => state.tasks.filter(t => t.attrId === a.id).length);
+
+        const ctx = document.getElementById('focusDistChart').getContext('2d');
+        chartInstances['focusDistChart'] = new Chart(ctx, {
+          type: cfgs.focus.type,
+          data: {
+            labels,
+            datasets: [{
+              data,
+              backgroundColor: state.attributes.map(a => a.color),
+              spacing: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { color: textColor } }, title: { display: true, text: 'Distribuição de Foco por Pilar', color: textColor } }
+          }
+        });
+      }
     }
 
-    // ======================= AÇÕES PRINCIPAIS =======================
-    window.app.completeTask = (taskId) => {
+    // 11. AÇÕES DO SISTEMA (GAME LOGIC)
+    function completeTask(taskId) {
       const task = state.tasks.find(t => t.id === taskId);
       if (!task || task.completed) return;
 
@@ -1167,7 +1867,17 @@
       state.gold = (state.gold || 0) + task.gold;
       state.completedCount = (state.completedCount || 0) + 1;
 
-      // Atualizar Streak
+      // Registo Histórico Fiável
+      if (!state.completionHistory) state.completionHistory = [];
+      state.completionHistory.push({
+        taskId: task.id,
+        attrId: task.attrId,
+        xp: earnedXP,
+        gold: task.gold,
+        timestamp: Date.now()
+      });
+
+      // Atualiza Streak com validação
       const now = new Date();
       const lastStr = state.lastStreakDate ? new Date(state.lastStreakDate) : null;
       if (!lastStr || now.toDateString() !== lastStr.toDateString()) {
@@ -1175,17 +1885,17 @@
         state.lastStreakDate = Date.now();
       }
 
-      // Confete
+      // Animação Confetes
       if (typeof confetti === 'function') {
-        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+        confetti({ particleCount: 40, spread: 50, origin: { y: 0.7 } });
       }
 
-      addLog('task_complete', `Concluiu a tarefa: "${task.title}" (+${earnedXP} XP${isBoost ? ' [2x Boost]' : ''}, +${task.gold} Gold). Streak: 🔥 ${state.streak} dias!`);
+      addLog('task_complete', `Concluiu: "${task.title}" (+${earnedXP} XP${isBoost ? ' [2x Boost]' : ''}, +${task.gold} Créditos). Streak: 🔥 ${state.streak}d`);
       saveState();
       renderAll();
-    };
+    }
 
-    window.app.triggerNegativeHabit = (taskId) => {
+    function triggerNegativeHabit(taskId) {
       const task = state.tasks.find(t => t.id === taskId);
       if (!task) return;
 
@@ -1195,159 +1905,386 @@
       state.hp = Math.max(0, (state.hp || 100) - hpLoss);
       state.gold = Math.max(0, (state.gold || 0) - goldLoss);
 
-      addLog('system', `⚠️ Cedeu ao hábito negativo "${task.title}". Perdeu -${hpLoss} HP e -${goldLoss} Gold.`);
+      addLog('system', `⚠️ Deslize registado em "${task.title}". Perdeu -${hpLoss}% Bateria e -${goldLoss} Créditos.`);
 
       if (state.hp <= 0) {
-        alert('🚨 SEU HP CHEGOU A ZERO! Você perdeu metade do seu Gold para se restaurar.');
+        alert('🚨 A TUA BATERIA CHEGOU A 0%! O sistema aplicou uma redução de segurança nos Créditos e restaurou a Bateria para 50%.');
         state.gold = Math.floor(state.gold / 2);
         state.hp = 50;
       }
 
       saveState();
       renderAll();
-    };
+    }
 
-    window.app.deleteTask = (taskId) => {
-      if (!confirm('Excluir esta tarefa?')) return;
+    function deleteTask(taskId) {
+      if (!confirm('Eliminar esta tarefa?')) return;
       const task = state.tasks.find(t => t.id === taskId);
       state.tasks = state.tasks.filter(t => t.id !== taskId);
       addLog('delete', `Tarefa removida: "${task ? task.title : taskId}"`);
       saveState();
       renderAll();
-    };
+    }
 
-    window.app.deleteAttribute = (attrId) => {
+    function editTask(taskId) {
+      const task = state.tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      document.getElementById('editTaskId').value = task.id;
+      document.getElementById('taskTitle').value = task.title;
+      document.getElementById('taskAttr').value = task.attrId;
+      document.getElementById('taskType').value = task.type;
+      document.getElementById('taskDiff').value = task.difficulty;
+      document.getElementById('taskRecurrence').value = task.recurrence;
+
+      if (task.recurrence === 'custom') {
+        document.getElementById('customDaysGroup').style.display = 'block';
+        document.querySelectorAll('#daysPicker .day-btn').forEach(btn => {
+          btn.classList.toggle('selected', (task.customDays || []).includes(parseInt(btn.dataset.day)));
+        });
+      } else {
+        document.getElementById('customDaysGroup').style.display = 'none';
+      }
+
+      document.getElementById('taskFormTitle').innerHTML = '<i class="fas fa-pen"></i> Editar Tarefa';
+      document.getElementById('btnSaveTask').innerHTML = '<i class="fas fa-floppy-disk"></i> Atualizar Tarefa';
+      document.getElementById('btnCancelEditTask').style.display = 'inline-flex';
+
+      switchTab('tab-tasks');
+    }
+
+    function deleteAttribute(attrId) {
       if (state.tasks.some(t => t.attrId === attrId)) {
-        alert('Não é possível excluir: existem tarefas vinculadas a este atributo.');
+        alert('Impossível eliminar: existem tarefas associadas a este pilar de vida.');
         return;
       }
-      if (!confirm('Excluir atributo?')) return;
+      if (!confirm('Eliminar este pilar?')) return;
       state.attributes = state.attributes.filter(a => a.id !== attrId);
+      addLog('delete', `Pilar removido.`);
       saveState();
       renderAll();
-    };
+    }
 
-    window.app.redeemReward = (rewardId) => {
+    function redeemReward(rewardId) {
       const reward = state.rewards.find(r => r.id === rewardId);
       if (!reward) return;
 
-      if (state.gold < reward.price) {
-        alert('Gold insuficiente.');
-        return;
+      if (state.gold < reward.price) return alert('Créditos insuficientes.');
+      if (reward.limit > 0 && (reward.usedCount || 0) >= reward.limit) {
+        return alert('Stock esgotado para este ciclo.');
       }
 
-      if (!confirm(`Resgatar "${reward.name}" por ${reward.price} Gold?`)) return;
+      if (!confirm(`Resgatar "${reward.name}" por ${reward.price} Créditos?`)) return;
 
       state.gold -= reward.price;
+      reward.usedCount = (reward.usedCount || 0) + 1;
 
       if (reward.isHpPotion) {
         state.hp = Math.min(state.maxHp || 100, (state.hp || 0) + 50);
-        addLog('reward_redeem', `Usou Porção de Cura! HP restaurado para ${state.hp}/${state.maxHp}.`);
+        addLog('reward_redeem', `Recarga de Energia utilizada! Bateria em ${state.hp}%.`);
       } else {
-        addLog('reward_redeem', `Resgatou recompensa: "${reward.name}" (-${reward.price} Gold).`);
+        addLog('reward_redeem', `Resgatou a recompensa: "${reward.name}" (-${reward.price} Créditos).`);
       }
 
-      if (typeof confetti === 'function') {
-        confetti({ particleCount: 40, spread: 50, origin: { y: 0.6 } });
-      }
+      if (typeof confetti === 'function') confetti({ particleCount: 30, spread: 40, origin: { y: 0.6 } });
 
       saveState();
       renderAll();
-    };
+    }
 
-    window.app.deleteReward = (rewardId) => {
-      if (!confirm('Excluir recompensa?')) return;
+    function deleteReward(rewardId) {
+      if (!confirm('Eliminar esta recompensa?')) return;
       state.rewards = state.rewards.filter(r => r.id !== rewardId);
       saveState();
       renderAll();
+    }
+
+    function exportCSV() {
+      let csv = 'Data,Tipo,Mensagem\n';
+      (state.logs || []).forEach(l => {
+        const d = new Date(l.timestamp).toLocaleString('pt-PT');
+        csv += `"${d}","${l.type}","${l.message.replace(/"/g, '""')}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `gameficado_logs_${Date.now()}.csv`;
+      a.click();
+    }
+
+    function restoreBackup() {
+      try {
+        const rawBkp = localStorage.getItem('gamification_backup');
+        if (!rawBkp) return;
+        if (!confirm('Restaurar os dados da cópia de segurança automática?')) return;
+        const bkp = JSON.parse(rawBkp);
+        state = bkp.data;
+        saveState();
+        renderAll();
+        alert('Cópia de segurança restaurada com sucesso!');
+      } catch(e) { alert('Erro ao restaurar cópia de segurança.'); }
+    }
+
+    // 12. INITIALIZERS DE EVENTOS & UI PICKERS
+    let selectedIcon = 'star';
+    let selectedColor = COLOR_LIST[0];
+
+    function initPickers() {
+      // Icon Picker
+      const iconGrid = document.getElementById('iconPicker');
+      iconGrid.innerHTML = '';
+      ICON_LIST.forEach(icon => {
+        const div = document.createElement('div');
+        div.className = `icon-swatch ${icon === selectedIcon ? 'selected' : ''}`;
+        div.innerHTML = `<i class="fas fa-${icon}"></i>`;
+        div.onclick = () => {
+          iconGrid.querySelectorAll('.icon-swatch').forEach(s => s.classList.remove('selected'));
+          div.classList.add('selected');
+          selectedIcon = icon;
+        };
+        iconGrid.appendChild(div);
+      });
+
+      // Color Picker
+      const colorGrid = document.getElementById('colorPicker');
+      colorGrid.innerHTML = '';
+      COLOR_LIST.forEach(color => {
+        const div = document.createElement('div');
+        div.className = `color-swatch ${color === selectedColor ? 'selected' : ''}`;
+        div.style.backgroundColor = color;
+        div.onclick = () => {
+          colorGrid.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+          div.classList.add('selected');
+          selectedColor = color;
+        };
+        colorGrid.appendChild(div);
+      });
+
+      // Accent Picker
+      const accentGrid = document.getElementById('accentPicker');
+      accentGrid.innerHTML = '';
+      ACCENT_COLORS.forEach((acc, idx) => {
+        const div = document.createElement('div');
+        div.className = `color-swatch ${idx === state.config.accentIndex ? 'selected' : ''}`;
+        div.style.backgroundColor = acc.primary;
+        div.title = acc.name;
+        div.onclick = () => {
+          state.config.accentIndex = idx;
+          saveState();
+          renderAll();
+        };
+        accentGrid.appendChild(div);
+      });
+    }
+
+    // Bindings de Formulários e Controlos
+    document.getElementById('taskRecurrence').onchange = (e) => {
+      document.getElementById('customDaysGroup').style.display = e.target.value === 'custom' ? 'block' : 'none';
     };
 
-    // ======================= EVENT BINDINGS =======================
-    document.getElementById('btnCreateTask').onclick = () => {
+    document.querySelectorAll('#daysPicker .day-btn').forEach(btn => {
+      btn.onclick = () => btn.classList.toggle('selected');
+    });
+
+    document.getElementById('btnSaveTask').onclick = () => {
+      const editId = document.getElementById('editTaskId').value;
       const title = document.getElementById('taskTitle').value.trim();
-      if (!title) return alert('Digite o nome da tarefa.');
+      if (!title) return alert('Digita o nome da tarefa.');
 
       const attrId = document.getElementById('taskAttr').value;
       const type = document.getElementById('taskType').value;
       const diff = document.getElementById('taskDiff').value;
       const recurrence = document.getElementById('taskRecurrence').value;
 
-      const diffConfig = state.config.difficulties[diff] || { xp: 25, gold: 12, hp: 20 };
+      let customDays = [];
+      if (recurrence === 'custom') {
+        document.querySelectorAll('#daysPicker .day-btn.selected').forEach(b => {
+          customDays.push(parseInt(b.dataset.day));
+        });
+      }
 
-      const newTask = {
-        id: 't-' + Date.now(),
-        title,
-        attrId,
-        type,
-        difficulty: diff,
-        recurrence,
-        completed: false,
-        xp: diffConfig.xp,
-        gold: diffConfig.gold,
-        hpPenalty: diffConfig.hp,
-        lastCompletedAt: null,
-        createdAt: Date.now()
-      };
+      const diffCfg = state.config.difficulties[diff] || { xp: 25, gold: 12, hp: 20 };
 
-      state.tasks.push(newTask);
+      if (editId) {
+        // Modo Edição
+        const task = state.tasks.find(t => t.id === editId);
+        if (task) {
+          task.title = title;
+          task.attrId = attrId;
+          task.type = type;
+          task.difficulty = diff;
+          task.recurrence = recurrence;
+          task.customDays = customDays;
+          addLog('task_create', `Tarefa atualizada: "${title}"`);
+        }
+      } else {
+        // Modo Criação
+        state.tasks.push({
+          id: 't-' + Date.now(),
+          title,
+          attrId,
+          type,
+          difficulty: diff,
+          recurrence,
+          customDays,
+          completed: false,
+          xp: diffCfg.xp,
+          gold: diffCfg.gold,
+          hpPenalty: diffCfg.hp,
+          lastCompletedAt: null,
+          createdAt: Date.now()
+        });
+        addLog('task_create', `Criou a tarefa: "${title}"`);
+      }
+
+      // Reset Form
+      document.getElementById('editTaskId').value = '';
       document.getElementById('taskTitle').value = '';
-      addLog('task_create', `Criou a tarefa: "${title}" (${type === 'negative' ? 'Hábito Negativo' : 'Positiva'})`);
+      document.getElementById('taskFormTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Criar Tarefa / Hábito';
+      document.getElementById('btnSaveTask').innerHTML = '<i class="fas fa-check"></i> Guardar Tarefa';
+      document.getElementById('btnCancelEditTask').style.display = 'none';
+
       saveState();
       renderAll();
     };
 
-    document.getElementById('btnCreateAttr').onclick = () => {
-      const nameInp = document.getElementById('attrName');
-      const name = nameInp.value.trim();
-      if (!name) return alert('Digite o nome do atributo.');
+    document.getElementById('btnCancelEditTask').onclick = () => {
+      document.getElementById('editTaskId').value = '';
+      document.getElementById('taskTitle').value = '';
+      document.getElementById('taskFormTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Criar Tarefa / Hábito';
+      document.getElementById('btnSaveTask').innerHTML = '<i class="fas fa-check"></i> Guardar Tarefa';
+      document.getElementById('btnCancelEditTask').style.display = 'none';
+    };
 
-      const colors = ['#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#10b981', '#ec4899', '#06b6d4'];
-      const icons = ['heartbeat', 'coins', 'bullseye', 'book', 'briefcase', 'dumbbell', 'brain'];
-      const randIdx = Math.floor(Math.random() * colors.length);
+    document.getElementById('btnCreateAttr').onclick = () => {
+      const name = document.getElementById('attrName').value.trim();
+      if (!name) return alert('Digita o nome do pilar.');
 
       state.attributes.push({
         id: 'attr-' + Date.now(),
         name,
-        icon: icons[randIdx],
-        color: colors[randIdx]
+        icon: selectedIcon,
+        color: selectedColor
       });
 
-      nameInp.value = '';
+      document.getElementById('attrName').value = '';
+      addLog('create_attr', `Pilar criado: "${name}"`);
       saveState();
       renderAll();
     };
 
     document.getElementById('btnCreateReward').onclick = () => {
-      const name = prompt('Nome da recompensa:');
-      if (!name) return;
-      const price = parseInt(prompt('Preço em Gold:'));
-      if (isNaN(price) || price <= 0) return alert('Preço inválido.');
+      const name = document.getElementById('rewardName').value.trim();
+      const price = parseInt(document.getElementById('rewardPrice').value);
+      const limit = parseInt(document.getElementById('rewardLimit').value) || 0;
+      const cycle = document.getElementById('rewardCycle').value;
+
+      if (!name || isNaN(price) || price <= 0) return alert('Preenche um nome e um preço válido.');
 
       state.rewards.push({
         id: 'r-' + Date.now(),
         name,
-        price
+        price,
+        limit,
+        cycle,
+        usedCount: 0,
+        lastResetAt: Date.now()
       });
 
+      document.getElementById('rewardName').value = '';
+      addLog('reward_create', `Recompensa criada: "${name}"`);
       saveState();
       renderAll();
     };
 
+    // Filtros de Pesquisa & Logs
     document.getElementById('taskSearchInput').oninput = renderTasks;
     document.getElementById('taskFilterAttr').onchange = renderTasks;
 
+    document.querySelectorAll('.filter-chips .chip-btn').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('.filter-chips .chip-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderLogs();
+      };
+    });
+
+    document.getElementById('btnExportCSV').onclick = exportCSV;
+
+    // Definições Binds
+    document.getElementById('btnThemeDark').onclick = () => { state.config.theme = 'dark'; saveState(); renderAll(); };
+    document.getElementById('btnThemeLight').onclick = () => { state.config.theme = 'light'; saveState(); renderAll(); };
+
+    ['easy','medium','hard','epic'].forEach(d => {
+      document.getElementById(`diff_${d}_xp`).onchange = (e) => { state.config.difficulties[d].xp = parseInt(e.target.value)||10; saveState(); };
+      document.getElementById(`diff_${d}_gold`).onchange = (e) => { state.config.difficulties[d].gold = parseInt(e.target.value)||5; saveState(); };
+    });
+
+    ['xp','completion','evolution','focus'].forEach(c => {
+      document.getElementById(`cfg_chart_${c}_visible`).onchange = (e) => { state.config.charts[c].visible = e.target.checked; saveState(); renderAll(); };
+      document.getElementById(`cfg_chart_${c}_type`).onchange = (e) => { state.config.charts[c].type = e.target.value; saveState(); renderAll(); };
+    });
+
+    // Backup JSON Import/Export
+    document.getElementById('btnExportJSON').onclick = () => {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+      const a = document.createElement('a');
+      a.href = dataStr;
+      a.download = `gameficado_backup_${Date.now()}.json`;
+      a.click();
+    };
+
+    document.getElementById('btnImportJSONTrigger').onclick = () => document.getElementById('importFileInput').click();
+    document.getElementById('importFileInput').onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const imported = JSON.parse(evt.target.result);
+          if (imported.attributes && imported.tasks) {
+            if (confirm('Substituir todos os dados atuais pelo ficheiro importado?')) {
+              state = imported;
+              saveState();
+              renderAll();
+              alert('Dados importados com sucesso!');
+            }
+          } else alert('Ficheiro JSON inválido.');
+        } catch(err) { alert('Erro ao ler o ficheiro JSON.'); }
+      };
+      reader.readAsText(file);
+    };
+
+    document.getElementById('btnResetAll').onclick = () => {
+      const text = prompt('Para APAGAR TUDO, digita "RESETAR" abaixo:');
+      if (text === 'RESETAR') {
+        localStorage.removeItem('gamification_state_v4');
+        localStorage.removeItem('gamification_backup');
+        state = JSON.parse(JSON.stringify(defaultState));
+        saveState();
+        renderAll();
+        alert('Aplicação reiniciada para os valores padrão.');
+      }
+    };
+
+    // RENDER GLOBAL PIPELINE
     function renderAll() {
       renderTopStats();
       renderTasks();
       renderAttributes();
       renderRewards();
       renderLogs();
+      renderConfig();
+      initPickers();
+
       if (document.getElementById('tab-overview').classList.contains('active')) {
         initCharts();
       }
     }
 
-    // Initialize
+    // Inicialização do ciclo de vida
     checkRecurrenceAndResets();
     renderAll();
     setInterval(checkRecurrenceAndResets, 60000);
